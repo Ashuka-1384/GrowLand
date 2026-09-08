@@ -1,0 +1,145 @@
+.level-badge {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid;
+  padding: var(--space-2) var(--space-3);
+  cursor: default;
+  transition: box-shadow var(--transition-base), transform var(--transition-fast);
+  overflow: visible;
+}
+
+/* Ring decoration */
+.level-badge__ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: calc(var(--radius-md) + 4px);
+  border: 1px dashed currentColor;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* Content */
+.level-badge__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.level-badge__label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.level-badge__number {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Tier label */
+.level-badge__tier {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
+/* ---- TIER COLORS ---- */
+
+/* Starter (1-5) */
+.level-badge--starter {
+  border-color: rgba(88, 166, 255, 0.3);
+  color: var(--color-tier-starter);
+  background: rgba(88, 166, 255, 0.06);
+}
+
+.level-badge--starter:hover {
+  box-shadow: 0 0 16px rgba(88, 166, 255, 0.3);
+}
+
+/* Advanced (6-10) */
+.level-badge--advanced {
+  border-color: rgba(0, 255, 136, 0.3);
+  color: var(--color-tier-advanced);
+  background: rgba(0, 255, 136, 0.06);
+}
+
+.level-badge--advanced:hover {
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.35);
+}
+
+/* Elite (11+) */
+.level-badge--elite {
+  border-color: rgba(255, 215, 0, 0.4);
+  color: var(--color-tier-elite);
+  background: rgba(255, 215, 0, 0.06);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.level-badge--elite:hover {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+/* ---- SIZES ---- */
+
+.level-badge--sm .level-badge__number {
+  font-size: 0.875rem;
+}
+.level-badge--sm .level-badge__label {
+  font-size: 0.5rem;
+}
+.level-badge--sm {
+  padding: 4px 8px;
+}
+
+.level-badge--md .level-badge__number {
+  font-size: 1.25rem;
+}
+
+.level-badge--lg .level-badge__number {
+  font-size: 2rem;
+}
+.level-badge--lg .level-badge__label {
+  font-size: 0.625rem;
+}
+.level-badge--lg {
+  padding: var(--space-3) var(--space-5);
+}
+
+.level-badge--xl {
+  padding: var(--space-4) var(--space-6);
+}
+.level-badge--xl .level-badge__number {
+  font-size: 2.5rem;
+}
+.level-badge--xl .level-badge__label {
+  font-size: 0.7rem;
+}
+
+/* Apex (21-50) */
+.level-badge--apex {
+  border-color: rgba(255, 107, 214, 0.42);
+  color: var(--color-tier-apex);
+  background: linear-gradient(135deg, rgba(255, 107, 214, 0.08), rgba(0, 255, 136, 0.05));
+  box-shadow: 0 0 18px rgba(255, 107, 214, 0.12);
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.level-badge--apex:hover {
+  box-shadow: 0 0 26px rgba(255, 107, 214, 0.28);
+}

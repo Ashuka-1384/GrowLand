@@ -1,0 +1,282 @@
+@import './variables.css';
+@import './animations.css';
+
+/* ================================
+   Reset & Base
+   ================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-width: 320px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-subtle);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-green-secondary);
+}
+
+/* Focus */
+:focus-visible {
+  outline: 2px solid var(--color-green-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-green-muted);
+  color: var(--color-green-primary);
+}
+
+/* ================================
+   Layout
+   ================================ */
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ================================
+   Utility
+   ================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.green {
+  color: var(--color-green-primary);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ================================
+   Background
+   ================================ */
+
+.page-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.page-background__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridPulse 6s ease-in-out infinite;
+}
+
+.page-background__glow-1 {
+  position: absolute;
+  top: -200px;
+  left: -200px;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.06) 0%, transparent 70%);
+  animation: drift 18s ease-in-out infinite;
+}
+
+.page-background__glow-2 {
+  position: absolute;
+  bottom: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 201, 107, 0.05) 0%, transparent 70%);
+  animation: drift 22s ease-in-out infinite reverse;
+}
+
+.page-background__noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+/* ================================
+   Page Content
+   ================================ */
+
+.page-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================================
+   Section
+   ================================ */
+
+.section {
+  padding: var(--space-16) 0;
+}
+
+.section--sm {
+  padding: var(--space-10) 0;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-8);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.section-title__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-green-primary);
+  box-shadow: 0 0 8px var(--color-green-primary);
+  flex-shrink: 0;
+}
+
+/* ================================
+   Divider
+   ================================ */
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0;
+}
+
+/* ================================
+   Chip / Tag base
+   ================================ */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+
+/* Runtime recovery screen: prevents a raw white/empty viewport when a client-side
+   exception occurs after deployment. */
+.app-error {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0,255,136,0.08), transparent 42%),
+    var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+.app-error__card {
+  width: min(100%, 560px);
+  padding: 32px;
+  border: 1px solid var(--color-border-green);
+  border-radius: var(--radius-xl);
+  background: rgba(13,13,13,0.92);
+  box-shadow: var(--shadow-modal);
+}
+
+.app-error__eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-green-primary);
+  font: 700 0.7rem var(--font-mono);
+  letter-spacing: 0.12em;
+}
+
+.app-error__card h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); }
+.app-error__card p { margin: 12px 0 20px; color: var(--color-text-muted); }
+.app-error__card button {
+  padding: 11px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-green-primary);
+  color: #050505;
+  font-weight: 800;
+}

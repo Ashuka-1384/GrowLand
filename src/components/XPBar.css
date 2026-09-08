@@ -1,0 +1,167 @@
+.xp-bar {
+  width: 100%;
+}
+
+/* Labels */
+.xp-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.xp-bar__xp {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.xp-bar__xp-current {
+  color: var(--color-green-primary);
+  font-weight: 700;
+}
+
+.xp-bar__xp-sep {
+  color: var(--color-text-subtle);
+}
+
+.xp-bar__xp-total {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.xp-bar__level {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+}
+
+.xp-bar__percent {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* Track */
+.xp-bar__track {
+  position: relative;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  overflow: visible;
+  cursor: pointer;
+}
+
+/* Fill */
+.xp-bar__fill {
+  position: relative;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    var(--color-green-secondary) 0%,
+    var(--color-green-primary) 100%
+  );
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.xp-bar__fill-glow {
+  position: absolute;
+  top: -4px;
+  right: -2px;
+  width: 12px;
+  height: 16px;
+  background: var(--color-green-primary);
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0.8;
+}
+
+.xp-bar__fill-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* Tooltip */
+.xp-bar__tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  border: 1px solid var(--color-border-green);
+  color: var(--color-green-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: var(--shadow-green-sm);
+  animation: fadeIn 0.15s ease;
+}
+
+.xp-bar__tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--color-border-green);
+}
+
+/* Remaining text */
+.xp-bar__remaining {
+  margin-top: 5px;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Sizes */
+.xp-bar--sm .xp-bar__track {
+  height: 5px;
+}
+
+.xp-bar--sm .xp-bar__labels {
+  margin-bottom: 4px;
+}
+
+.xp-bar--sm .xp-bar__xp {
+  font-size: 0.7rem;
+}
+
+.xp-bar--lg .xp-bar__track {
+  height: 12px;
+}
+
+.xp-bar--lg .xp-bar__xp {
+  font-size: 0.9375rem;
+}
+
+.xp-bar--lg .xp-bar__xp-current {
+  font-size: 1.1rem;
+}
+
+.xp-bar--lg .xp-bar__level {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+}
+
+.xp-bar__percent {
+  font-size: 0.875rem;
+}

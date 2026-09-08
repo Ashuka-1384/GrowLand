@@ -1,0 +1,140 @@
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+/* Pills */
+.filter-bar__section {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-bar__pills {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  color: var(--color-text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.filter-pill--active {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: var(--color-green-secondary);
+  color: var(--color-green-primary);
+}
+
+.filter-pill--active:hover {
+  background: rgba(0, 255, 136, 0.15);
+}
+
+/* Selects */
+.filter-bar__selects {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filter-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-select-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.filter-select {
+  height: 36px;
+  padding: 0 var(--space-4) 0 30px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  min-width: 130px;
+}
+
+.filter-select:focus {
+  border-color: var(--color-green-secondary);
+  background: rgba(0, 255, 136, 0.04);
+}
+
+.filter-select option {
+  background: #1a1a1a;
+  color: var(--color-text-primary);
+}
+
+/* Count */
+.filter-bar__count {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+.filter-bar__count-num {
+  color: var(--color-green-primary);
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .filter-bar__pills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: var(--space-1);
+    scrollbar-width: none;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-bar__pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-bar__selects {
+    width: 100%;
+  }
+
+  .filter-select {
+    flex: 1;
+    min-width: auto;
+  }
+}

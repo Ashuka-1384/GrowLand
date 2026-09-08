@@ -1,0 +1,81 @@
+:root {
+  /* Core Colors */
+  --color-bg: #050505;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-card: #0d0d0d;
+  --color-bg-card-hover: #111111;
+  --color-bg-modal: #080808;
+
+  /* Green Palette */
+  --color-green-primary: #00ff88;
+  --color-green-secondary: #00c96b;
+  --color-green-dark: #063d28;
+  --color-green-muted: rgba(0, 255, 136, 0.12);
+  --color-green-glow: rgba(0, 255, 136, 0.25);
+  --color-green-glow-strong: rgba(0, 255, 136, 0.45);
+
+  /* Text */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c9d1d9;
+  --color-text-muted: #6e7681;
+  --color-text-subtle: #3d4451;
+
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-hover: rgba(0, 255, 136, 0.3);
+  --color-border-green: rgba(0, 255, 136, 0.2);
+
+  /* Level Tier Colors */
+  --color-tier-starter: #58a6ff;
+  --color-tier-advanced: #00ff88;
+  --color-tier-elite: #ffd700;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Fonts */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 8px 40px rgba(0, 255, 136, 0.12), 0 4px 24px rgba(0, 0, 0, 0.6);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.8);
+  --shadow-green-sm: 0 0 12px rgba(0, 255, 136, 0.3);
+  --shadow-green-md: 0 0 24px rgba(0, 255, 136, 0.4);
+  --shadow-green-lg: 0 0 48px rgba(0, 255, 136, 0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-index */
+  --z-header: 100;
+  --z-modal: 200;
+  --z-overlay: 199;
+}
+
+/* Progression accents */
+--color-tier-apex: #ff6bd6;
+--color-warning: #ffb454;
+--color-danger: #ff5f7a;

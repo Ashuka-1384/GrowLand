@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Ali Ahmadi",
+      "age": 21,
+      "city": "Tehran",
+      "goal": "Frontend Developer",
+      "level": 8,
+      "xp": 7350,
+      "skills": [
+        {
+          "name": "JavaScript",
+          "level": 4
+        },
+        {
+          "name": "React",
+          "level": 3
+        },
+        {
+          "name": "CSS",
+          "level": 4
+        },
+        {
+          "name": "English",
+          "level": 2
+        }
+      ]
+    }
+  ]
+}

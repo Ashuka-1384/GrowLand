@@ -1,0 +1,227 @@
+.member-card {
+  position: relative;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition:
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base),
+    opacity 0.5s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.member-card--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.member-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-card-hover);
+  background: var(--color-bg-card-hover);
+}
+
+.member-card:hover .member-card__glow {
+  opacity: 1;
+}
+
+.member-card:hover .member-card__cta {
+  color: var(--color-green-primary);
+  transform: translateX(3px);
+}
+
+.member-card:focus-visible {
+  outline: 2px solid var(--color-green-primary);
+  outline-offset: 3px;
+}
+
+/* Glow */
+.member-card__glow {
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.07) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  pointer-events: none;
+}
+
+/* Header */
+.member-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.member-card__identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.member-card__name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+
+.member-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.member-card__city {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.member-card__age {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+}
+
+/* Level */
+.member-card__level-wrap {
+  flex-shrink: 0;
+}
+
+/* XP */
+.member-card__xp {
+  width: 100%;
+}
+
+/* Skills */
+.member-card__skills {
+  flex: 1;
+}
+
+.member-card__skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.member-card__skills-more {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.member-card__skills-empty {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+  font-style: italic;
+}
+
+/* Footer */
+.member-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  gap: var(--space-2);
+}
+
+.member-card__goal {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.member-card__goal-label {
+  font-size: 0.65rem;
+  color: var(--color-text-subtle);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.member-card__goal-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-card__cta {
+  color: var(--color-text-subtle);
+  flex-shrink: 0;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+/* Avatar */
+.member-avatar {
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.member-avatar--sm {
+  width: 36px;
+  height: 36px;
+}
+
+.member-avatar--md {
+  width: 44px;
+  height: 44px;
+}
+
+.member-avatar--lg {
+  width: 72px;
+  height: 72px;
+}
+
+.member-avatar--xl {
+  width: 96px;
+  height: 96px;
+}
+
+.member-avatar__initials {
+  font-weight: 800;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+.member-avatar--sm .member-avatar__initials { font-size: 0.75rem; }
+.member-avatar--lg .member-avatar__initials { font-size: 1.5rem; }
+.member-avatar--xl .member-avatar__initials { font-size: 2rem; }

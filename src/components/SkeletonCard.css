@@ -1,0 +1,82 @@
+.skeleton-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease infinite;
+}
+
+.skeleton-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.skeleton-card__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.skeleton-card__identity {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-card__name {
+  height: 16px;
+  width: 60%;
+}
+
+.skeleton-card__meta {
+  height: 12px;
+  width: 40%;
+}
+
+.skeleton-card__badge {
+  width: 48px;
+  height: 52px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-card__bar {
+  height: 8px;
+  border-radius: var(--radius-full);
+  width: 100%;
+}
+
+.skeleton-card__skills {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.skeleton-card__skill {
+  height: 26px;
+  border-radius: var(--radius-full);
+  width: 80px;
+}
+
+.skeleton-card__skill--sm { width: 60px; }
+.skeleton-card__skill--lg { width: 100px; }
+
+.skeleton-card__footer {
+  height: 40px;
+  border-radius: var(--radius-md);
+}

@@ -1,0 +1,52 @@
+.skill-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid;
+  cursor: default;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.skill-tag:hover {
+  transform: translateY(-1px);
+}
+
+.skill-tag__name {
+  font-weight: 600;
+}
+
+.skill-tag__level {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+/* Tooltip */
+.skill-tag__tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  z-index: 20;
+  pointer-events: none;
+  animation: fadeIn 0.15s ease;
+}
