@@ -29,6 +29,9 @@
   --color-tier-starter: #58a6ff;
   --color-tier-advanced: #00ff88;
   --color-tier-elite: #ffd700;
+  --color-tier-apex: #ff6bd6;
+  --color-warning: #ffb454;
+  --color-danger: #ff5f7a;
 
   /* Spacing */
   --space-1: 4px;
@@ -75,7 +78,3 @@
   --z-overlay: 199;
 }
 
-/* Progression accents */
---color-tier-apex: #ff6bd6;
---color-warning: #ffb454;
---color-danger: #ff5f7a;

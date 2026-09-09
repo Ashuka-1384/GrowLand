@@ -75,10 +75,10 @@ export default function Header({ onSearchFocus, adminMode = false, onAdminModeTo
             className={`header__admin-btn ${adminMode ? 'header__admin-btn--active' : ''}`}
             onClick={onAdminModeToggle}
             aria-pressed={adminMode}
-            aria-label={adminMode ? 'Disable manager controls' : 'Enable manager controls'}
+            aria-label={adminMode ? 'Disable demo manager controls' : 'Enable demo manager controls'}
           >
             <span className="header__admin-dot" />
-            <span>{adminMode ? 'Manage' : 'View'}</span>
+            <span>{adminMode ? 'Demo' : 'View'}</span>
           </button>
 
           <button
@@ -125,7 +125,7 @@ export default function Header({ onSearchFocus, adminMode = false, onAdminModeTo
             Members
           </button>
           <button className={`header__mobile-link ${adminMode ? 'header__mobile-link--active' : ''}`} onClick={onAdminModeToggle}>
-            {adminMode ? 'Disable Manager Mode' : 'Enable Manager Mode'}
+            {adminMode ? 'Disable Demo Manager' : 'Enable Demo Manager'}
           </button>
         </nav>
       )}

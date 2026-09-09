@@ -104,7 +104,7 @@ export default function MemberModal({ user, onClose, adminMode = false, onXPChan
           <div className="modal__section modal__admin-section">
             <div className="modal__section-heading">
               <h3 className="modal__section-title"><span className="modal__section-kicker">CONTROL</span> Award XP</h3>
-              <span className="modal__micro-status">MANAGER MODE</span>
+              <span className="modal__micro-status">DEMO MANAGER</span>
             </div>
             <div className="modal__quick-actions">
               {QUICK_XP_AMOUNTS.map((amount) => (
@@ -125,7 +125,7 @@ export default function MemberModal({ user, onClose, adminMode = false, onXPChan
               <button onClick={handleCustom}>Add XP</button>
             </div>
             {notice && <div className={`modal__notice modal__notice--${notice.type}`}>{notice.text}</div>}
-            <p className="modal__admin-note">Changes are stored locally in this browser. A production multi-user panel needs server-side auth + persistent storage.</p>
+            <p className="modal__admin-note">Demo changes are stored only in this browser. This is not authentication or shared production storage.</p>
           </div>
         )}
 

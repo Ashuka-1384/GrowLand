@@ -30,11 +30,11 @@ GrowLand now uses XP as the single source of truth for progression:
 - Level 1 starts at 0 XP and each level requires 1,000 XP.
 - Maximum progression is Level 50 / 50,000 XP.
 - A member's level is calculated automatically from XP, so level/XP mismatches cannot occur.
-- Manager Mode provides quick XP grants (+100, +250, +500, +1,000) and custom XP awards.
+- Demo Manager provides quick XP grants (+100, +250, +500, +1,000) and custom XP awards.
 - XP changes are stored in `localStorage` for the current browser and a recent XP activity log is kept per member.
 - `Reset demo data` restores the original JSON dataset.
 
-> **Important:** This repository remains a static Vite/React app. Browser-local persistence is useful for demos and a single-device workspace, but it is not a secure multi-admin database. For production shared state, add server-side authentication and persistent storage/API later.
+> **Important:** This repository remains a static Vite/React app. `users.json` is the deploy-time source of truth, while Demo Manager edits are stored only in the current browser via `localStorage`. Anyone who can open the public site can inspect or alter that local demo state, so it must not be treated as an authenticated admin panel. Shared production edits require a server-side API, authentication, and persistent storage.
 
 ## Tech Stack
 

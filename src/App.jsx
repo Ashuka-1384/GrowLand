@@ -101,6 +101,7 @@ export default function App() {
   }, [updateUserXP]);
 
   const handleReset = useCallback(() => {
+    if (!window.confirm('Reset all local demo changes and restore the JSON baseline?')) return;
     const baseline = resetUsers();
     if (selectedUser) {
       const restored = baseline.find((user) => user.id === selectedUser.id);
@@ -201,7 +202,7 @@ export default function App() {
               <span>GrowLand</span>
             </div>
             <p className="footer__tagline">Growth made visible.</p>
-            <p className="footer__copy">© {new Date().getFullYear()} GrowLand. All growth is real.</p>
+            <p className="footer__copy">© {new Date().getFullYear()} GrowLand. Demo dashboard • data shown from the project JSON.</p>
           </div>
         </footer>
       </div>

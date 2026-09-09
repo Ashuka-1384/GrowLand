@@ -8,7 +8,7 @@ export const MIN_XP = 0;
 export const MAX_LEVEL = 50;
 export const MAX_XP = MAX_LEVEL * XP_PER_LEVEL;
 
-export const QUICK_XP_AMOUNTS = [100, 250, 500, 1000];
+export const QUICK_XP_AMOUNTS = [100, 150, 200, 500, 1000];
 
 export function clampXP(xp) {
   const value = Number(xp);

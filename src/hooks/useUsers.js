@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import usersData from '../data/users.json';
 import { clampXP, levelFromXP, normalizeUsers } from '../utils/xp';
 
-const USERS_STORAGE_KEY = 'growland-users-v2';
+const USERS_STORAGE_KEY = 'growland-users-v3';
 const HISTORY_STORAGE_KEY = 'growland-xp-history-v1';
 const MAX_HISTORY_ITEMS = 100;
+const DATA_VERSION = Number(usersData.version || 1);
 
 function readStorage(key, fallback) {
   try {
@@ -37,12 +38,13 @@ export function useUsers() {
           throw new Error('Invalid data structure in users.json');
         }
 
-        const storedUsers = readStorage(USERS_STORAGE_KEY, null);
+        const stored = readStorage(USERS_STORAGE_KEY, null);
         const storedHistory = readStorage(HISTORY_STORAGE_KEY, []);
-        const source = Array.isArray(storedUsers) ? storedUsers : usersData.users;
+        const hasCurrentVersion = stored && stored.version === DATA_VERSION && Array.isArray(stored.users);
+        const source = hasCurrentVersion ? stored.users : usersData.users;
 
         setUsers(normalizeUsers(source));
-        setHistory(Array.isArray(storedHistory) ? storedHistory : []);
+        setHistory(hasCurrentVersion && Array.isArray(storedHistory) ? storedHistory : []);
         setError(null);
       } catch (err) {
         setError(err.message || 'Failed to load growth data.');
@@ -93,7 +95,7 @@ export function useUsers() {
     };
 
     setUsers(nextUsers);
-    writeStorage(USERS_STORAGE_KEY, nextUsers);
+    writeStorage(USERS_STORAGE_KEY, { version: DATA_VERSION, users: nextUsers });
     setHistory((currentHistory) => {
       const nextHistory = [entry, ...currentHistory].slice(0, MAX_HISTORY_ITEMS);
       writeStorage(HISTORY_STORAGE_KEY, nextHistory);
@@ -112,7 +114,7 @@ export function useUsers() {
     const baseline = normalizeUsers(usersData.users);
     setUsers(baseline);
     setHistory([]);
-    writeStorage(USERS_STORAGE_KEY, baseline);
+    writeStorage(USERS_STORAGE_KEY, { version: DATA_VERSION, users: baseline });
     writeStorage(HISTORY_STORAGE_KEY, []);
     return baseline;
   }, []);

@@ -64,7 +64,7 @@ export function getTopGrowers(members, n = 3) {
 export function getHighestLevelMember(members) {
   if (!members.length) return null;
   return members.reduce((max, m) =>
-    (m.level || 0) > (max.level || 0) ? m : max
+    levelFromXP(m.xp) > levelFromXP(max.xp) ? m : max
   );
 }
 

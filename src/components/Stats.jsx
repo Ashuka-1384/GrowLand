@@ -108,7 +108,7 @@ export default function Stats({ users }) {
         </div>
 
         <div className="stats-grid">
-          <StatCard icon={iconMembers} label="Active Members" delay={0.05}>
+          <StatCard icon={iconMembers} label="Members" delay={0.05}>
             <AnimatedNumber value={stats.totalMembers} start={visible} />
           </StatCard>
 
