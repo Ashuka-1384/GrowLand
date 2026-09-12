@@ -16,6 +16,7 @@
 
 /* Item */
 .leaderboard-item {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -130,6 +131,7 @@
 
 /* Stats */
 .leaderboard-item__stats {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

@@ -59,6 +59,7 @@
 }
 
 .members-section__headline-row {
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -132,4 +133,23 @@
   .members-section__headline-row,
   .admin-toolbar { flex-direction: column; align-items: flex-start; }
   .workspace-chip { align-self: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .members-section__headline-row {
+    align-items: flex-start;
+  }
+
+  .members-section__desc {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-toolbar {
+    padding: 14px;
+  }
+
+  .admin-toolbar__reset {
+    width: 100%;
+  }
 }

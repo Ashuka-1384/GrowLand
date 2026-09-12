@@ -30,7 +30,7 @@ GrowLand now uses XP as the single source of truth for progression:
 - Level 1 starts at 0 XP and each level requires 1,000 XP.
 - Maximum progression is Level 50 / 50,000 XP.
 - A member's level is calculated automatically from XP, so level/XP mismatches cannot occur.
-- Demo Manager provides quick XP grants (+100, +250, +500, +1,000) and custom XP awards.
+- Demo Manager provides quick XP grants (+100, +150, +200, +500, +1,000) and custom XP awards.
 - XP changes are stored in `localStorage` for the current browser and a recent XP activity log is kept per member.
 - `Reset demo data` restores the original JSON dataset.
 
@@ -121,3 +121,24 @@ vercel
 All member data lives in one file:
 
 ```
+
+
+## Responsive audit — September 2026
+
+The mobile layout was hardened for narrow devices (including 320–400px viewports):
+
+- Removed horizontal page overflow at the root/layout level with `overflow-x: clip` and width constraints.
+- Made containers, cards, grids and flex children shrink safely with `min-width: 0`.
+- Reworked the member profile modal so its width can never exceed the viewport.
+- Prevented modal content, skill rows, history rows, long names and goals from creating horizontal overflow.
+- Added mobile-safe modal sizing with `svh`, safe-area bottom padding and touch scrolling.
+- Optimized the modal header and level badge for narrow screens.
+- Added narrow-screen header adjustments so the navigation cannot push the viewport horizontally.
+- Improved small-screen admin controls so buttons remain usable without overflow.
+- Kept the existing static JSON + localStorage architecture; no database or backend was introduced.
+
+### Verification
+
+`node scripts/validate-data.mjs` passes successfully for the bundled dataset (16 users, version 1).
+
+The supplied environment did not contain the project's installed npm dependencies, so a local `vite build` could not be executed here. The package remains unchanged and is ready to build with `npm install && npm run build` before Vercel deployment.

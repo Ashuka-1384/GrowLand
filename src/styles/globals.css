@@ -16,15 +16,23 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  scrollbar-gutter: stable;
 }
 
 body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 320px;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
   font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;
-  min-width: 320px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -183,6 +191,9 @@ img, svg {
 .page-content {
   position: relative;
   z-index: 1;
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 /* ================================
@@ -190,6 +201,8 @@ img, svg {
    ================================ */
 
 .section {
+  width: 100%;
+  min-width: 0;
   padding: var(--space-16) 0;
 }
 
@@ -279,4 +292,36 @@ img, svg {
   background: var(--color-green-primary);
   color: #050505;
   font-weight: 800;
+}
+
+/* Mobile viewport hardening */
+#root,
+.app,
+main,
+section,
+.container {
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
