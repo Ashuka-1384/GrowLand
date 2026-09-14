@@ -62,14 +62,16 @@ export default function Leaderboard({ users, onCardClick }) {
                 <div
                   className="leaderboard-item__avatar"
                   style={{
-                    background: `linear-gradient(135deg,
-                      hsla(${hue}, 60%, 25%, 0.8),
-                      hsla(${hue + 40}, 60%, 20%, 0.8))`,
-                    borderColor: `hsla(${hue}, 60%, 40%, 0.3)`,
+                    '--avatar-hue': hue,
+                    borderColor: `hsla(${hue}, 60%, 55%, 0.28)`,
                   }}
                   aria-hidden="true"
                 >
-                  <span>{getInitials(user.name)}</span>
+                  {user.profileImage ? (
+                    <img src={user.profileImage} alt="" loading="lazy" />
+                  ) : (
+                    <span>{getInitials(user.name)}</span>
+                  )}
                 </div>
 
                 {/* Info */}

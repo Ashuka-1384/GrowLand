@@ -72,7 +72,7 @@ export default function MemberModal({ user, onClose, adminMode = false, onXPChan
         <div className="modal__bg-glow" aria-hidden="true" />
 
         <div className="modal__header">
-          <Avatar name={name} size="xl" />
+          <Avatar name={name} image={user?.profileImage} alt={user?.profileAlt || `${name} profile portrait`} size="xl" />
           <div className="modal__identity">
             <div className="modal__tier-tag"><span className="modal__tier-dot" />{tierLabel} Grower</div>
             <h2 className="modal__name">{name}</h2>

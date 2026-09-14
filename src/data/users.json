@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "users": [
     {
       "id": 1,
@@ -26,7 +26,9 @@
           "name": "English",
           "level": 2
         }
-      ]
+      ],
+      "profileImage": "/profile-images/01-ali-ahmadi.jpg",
+      "profileAlt": "Ali Ahmadi profile portrait"
     },
     {
       "id": 2,
@@ -53,7 +55,9 @@
           "name": "Research",
           "level": 3
         }
-      ]
+      ],
+      "profileImage": "/profile-images/02-sara-mohammadi.jpg",
+      "profileAlt": "Sara Mohammadi profile portrait"
     },
     {
       "id": 3,
@@ -80,7 +84,9 @@
           "name": "Docker",
           "level": 2
         }
-      ]
+      ],
+      "profileImage": "/profile-images/03-amir-hosseini.jpg",
+      "profileAlt": "Amir Hosseini profile portrait"
     },
     {
       "id": 4,
@@ -103,7 +109,9 @@
           "name": "Statistics",
           "level": 3
         }
-      ]
+      ],
+      "profileImage": "/profile-images/04-maryam-karimi.jpg",
+      "profileAlt": "Maryam Karimi profile portrait"
     },
     {
       "id": 5,
@@ -134,7 +142,9 @@
           "name": "DevOps",
           "level": 2
         }
-      ]
+      ],
+      "profileImage": "/profile-images/05-reza-tehrani.jpg",
+      "profileAlt": "Reza Tehrani profile portrait"
     },
     {
       "id": 6,
@@ -161,7 +171,9 @@
           "name": "English",
           "level": 4
         }
-      ]
+      ],
+      "profileImage": "/profile-images/06-negar-sadeghi.jpg",
+      "profileAlt": "Negar Sadeghi profile portrait"
     },
     {
       "id": 7,
@@ -184,7 +196,9 @@
           "name": "JavaScript",
           "level": 1
         }
-      ]
+      ],
+      "profileImage": "/profile-images/07-daniyal-rezaei.jpg",
+      "profileAlt": "Daniyal Rezaei profile portrait"
     },
     {
       "id": 8,
@@ -211,7 +225,9 @@
           "name": "Kubernetes",
           "level": 2
         }
-      ]
+      ],
+      "profileImage": "/profile-images/08-fatemeh-jafari.jpg",
+      "profileAlt": "Fatemeh Jafari profile portrait"
     },
     {
       "id": 9,
@@ -238,7 +254,9 @@
           "name": "Python",
           "level": 2
         }
-      ]
+      ],
+      "profileImage": "/profile-images/09-parsa-ghorbani.jpg",
+      "profileAlt": "Parsa Ghorbani profile portrait"
     },
     {
       "id": 10,
@@ -261,7 +279,9 @@
           "name": "Figma",
           "level": 2
         }
-      ]
+      ],
+      "profileImage": "/profile-images/10-shirin-moradi.jpg",
+      "profileAlt": "Shirin Moradi profile portrait"
     },
     {
       "id": 11,
@@ -288,7 +308,9 @@
           "name": "Networking",
           "level": 4
         }
-      ]
+      ],
+      "profileImage": "/profile-images/11-mehdi-nazari.jpg",
+      "profileAlt": "Mehdi Nazari profile portrait"
     },
     {
       "id": 12,
@@ -311,7 +333,9 @@
           "name": "JavaScript",
           "level": 1
         }
-      ]
+      ],
+      "profileImage": "/profile-images/12-yasna-bahrami.jpg",
+      "profileAlt": "Yasna Bahrami profile portrait"
     },
     {
       "id": 13,
@@ -338,7 +362,9 @@
           "name": "Python",
           "level": 3
         }
-      ]
+      ],
+      "profileImage": "/profile-images/13-kamran-eslami.jpg",
+      "profileAlt": "Kamran Eslami profile portrait"
     },
     {
       "id": 14,
@@ -365,7 +391,9 @@
           "name": "Research",
           "level": 3
         }
-      ]
+      ],
+      "profileImage": "/profile-images/14-hana-pourali.jpg",
+      "profileAlt": "Hana Pourali profile portrait"
     },
     {
       "id": 15,
@@ -388,7 +416,9 @@
           "name": "3D Modeling",
           "level": 2
         }
-      ]
+      ],
+      "profileImage": "/profile-images/15-sohrab-akhavan.jpg",
+      "profileAlt": "Sohrab Akhavan profile portrait"
     },
     {
       "id": 16,
@@ -415,7 +445,9 @@
           "name": "Research",
           "level": 3
         }
-      ]
+      ],
+      "profileImage": "/profile-images/16-kimia-rostami.jpg",
+      "profileAlt": "Kimia Rostami profile portrait"
     }
   ]
 }
