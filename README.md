@@ -142,3 +142,18 @@ The mobile layout was hardened for narrow devices (including 320–400px viewpor
 `node scripts/validate-data.mjs` passes successfully for the bundled dataset (16 users, version 1).
 
 The supplied environment did not contain the project's installed npm dependencies, so a local `vite build` could not be executed here. The package remains unchanged and is ready to build with `npm install && npm run build` before Vercel deployment.
+
+## Articles system
+
+The dashboard now includes a global Articles section and a lightweight static publishing workflow.
+
+- Article HTML files live in `public/articles/`.
+- `public/articles/article.css` is the shared global article stylesheet.
+- `public/articles/template.html` is the master HTML template for new articles.
+- `src/data/articles.json` controls the article cards shown on the dashboard. Add one metadata entry when publishing a new HTML article.
+- Each article opens as its own static HTML page, so the article body can be edited without touching the React dashboard components.
+
+## Library
+
+The header includes a Library shortcut to:
+`https://grow-land-archive.growland.workers.dev`

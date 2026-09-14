@@ -10,6 +10,7 @@ import SearchBar from './components/SearchBar';
 import FilterBar from './components/FilterBar';
 import MemberGrid from './components/MemberGrid';
 import MemberModal from './components/MemberModal';
+import ArticlesSection from './components/ArticlesSection';
 
 import './styles/globals.css';
 import './App.css';
@@ -133,6 +134,8 @@ export default function App() {
           {!loading && !error && users.length > 0 && (
             <Leaderboard users={users} onCardClick={handleCardClick} />
           )}
+
+          <ArticlesSection />
 
           <section id="members" className="members-section section" aria-label="Member directory">
             <div className="container">

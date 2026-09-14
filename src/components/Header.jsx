@@ -67,10 +67,26 @@ export default function Header({ onSearchFocus, adminMode = false, onAdminModeTo
           >
             Stats
           </button>
+          <button
+            className="header__nav-link"
+            onClick={() => scrollTo('articles')}
+          >
+            Articles
+          </button>
         </nav>
 
         {/* Actions */}
         <div className="header__actions">
+          <a
+            className="header__library-link"
+            href="https://grow-land-archive.growland.workers.dev"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open GrowLand Library"
+          >
+            <span className="header__library-mark" aria-hidden="true">↗</span>
+            <span>Library</span>
+          </a>
           <button
             className={`header__admin-btn ${adminMode ? 'header__admin-btn--active' : ''}`}
             onClick={onAdminModeToggle}
@@ -124,6 +140,18 @@ export default function Header({ onSearchFocus, adminMode = false, onAdminModeTo
           <button className="header__mobile-link" onClick={() => scrollTo('members')}>
             Members
           </button>
+          <button className="header__mobile-link" onClick={() => scrollTo('articles')}>
+            Articles
+          </button>
+          <a
+            className="header__mobile-link header__mobile-link--external"
+            href="https://grow-land-archive.growland.workers.dev"
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => setMenuOpen(false)}
+          >
+            Library ↗
+          </a>
           <button className={`header__mobile-link ${adminMode ? 'header__mobile-link--active' : ''}`} onClick={onAdminModeToggle}>
             {adminMode ? 'Disable Demo Manager' : 'Enable Demo Manager'}
           </button>
