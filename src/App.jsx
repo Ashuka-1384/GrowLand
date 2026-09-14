@@ -54,6 +54,7 @@ export default function App() {
   const [skillFilter, setSkillFilter] = useState('all');
   const [sortBy, setSortBy] = useState('level-desc');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [articlesArchiveOpen, setArticlesArchiveOpen] = useState(false);
   const [adminMode, setAdminMode] = useState(() => {
     try {
       return window.sessionStorage.getItem('growland-admin-mode') === '1';
@@ -125,6 +126,7 @@ export default function App() {
           onSearchFocus={handleSearchFocus}
           adminMode={adminMode}
           onAdminModeToggle={toggleAdminMode}
+          onArticlesOpen={() => setArticlesArchiveOpen(true)}
         />
 
         <main id="main-content">
@@ -135,7 +137,7 @@ export default function App() {
             <Leaderboard users={users} onCardClick={handleCardClick} />
           )}
 
-          <ArticlesSection />
+          <ArticlesSection archiveOpen={articlesArchiveOpen} onArchiveOpen={() => setArticlesArchiveOpen(true)} onArchiveClose={() => setArticlesArchiveOpen(false)} />
 
           <section id="members" className="members-section section" aria-label="Member directory">
             <div className="container">
@@ -198,11 +200,7 @@ export default function App() {
         <footer className="footer" role="contentinfo">
           <div className="container footer__inner">
             <div className="footer__brand">
-              <svg width="18" height="18" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                <path d="M3 16 L8 8 L12 13 L16 6" stroke="#00FF88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="16" cy="6" r="2" fill="#00FF88" />
-              </svg>
-              <span>GrowLand</span>
+              <img src="/brand/growland-logo.png" alt="GrowLand" />
             </div>
             <p className="footer__tagline">Growth made visible.</p>
             <p className="footer__copy">© {new Date().getFullYear()} GrowLand. Demo dashboard • data shown from the project JSON.</p>

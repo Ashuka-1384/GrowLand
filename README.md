@@ -157,3 +157,13 @@ The dashboard now includes a global Articles section and a lightweight static pu
 
 The header includes a Library shortcut to:
 `https://grow-land-archive.growland.workers.dev`
+
+## Articles archive
+
+The dashboard home shows only the 3 newest articles, sorted by `date` from `src/data/articles.json`. The `Articles` navigation item opens the full article archive panel, which contains every published article.
+
+Each article remains a standalone HTML file under `public/articles/` and shares the global stylesheet in `public/articles/article.css`.
+
+## Brand asset
+
+The supplied GrowLand logo is stored as `public/brand/growland-logo.png` and is used as the canonical logo in the dashboard header and footer.
