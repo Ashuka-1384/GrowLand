@@ -30,6 +30,7 @@ function Avatar({ name, image, alt, size = 'md' }) {
           src={image}
           alt={alt || `${name} profile`}
           loading="lazy"
+          decoding="async"
           draggable="false"
         />
       )}

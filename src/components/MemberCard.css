@@ -38,3 +38,5 @@
 @keyframes cardScan{0%{transform:translateY(-220%)}70%,100%{transform:translateY(820%)}}
 @media(max-width:560px){.member-card__inner{min-height:510px;border-radius:24px}.member-card__photo-wrap{height:225px;flex-basis:225px}.member-card__content{padding:16px}.member-card__name{font-size:1.12rem}.member-card__goal-line{max-width:100%}.member-card__subhint{font-size:.6rem}.member-avatar__orbit{inset:14px;border-radius:17px}}
 @media(prefers-reduced-motion:reduce){.member-card__image,.member-card__shine,.member-card__inner{transition:none}.member-card__ambient,.member-card__scan,.member-avatar__orbit{animation:none}}
+
+@media (hover:none) and (pointer:coarse){.member-card__shine,.member-card__scan,.member-avatar__shine,.member-avatar__orbit{animation:none;transition:none}.member-card:hover .member-avatar__image{transform:scale(1.012);filter:saturate(.95) contrast(1.03)}.member-card:hover .member-card__cta{transform:none}.member-card__scan{display:none}}
