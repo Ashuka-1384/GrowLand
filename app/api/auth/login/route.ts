@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server'; import {getStore} from '@/lib/store'; import {normalizePhone,setSession} from '@/lib/auth';
+export async function POST(req:Request){const {phone}=await req.json();const s=await getStore();const m=s.members.find(x=>x.phone===normalizePhone(phone||''));if(!m)return NextResponse.json({error:'این شماره عضو GrowLand نیست. ابتدا ثبت‌نام کنید.'},{status:404});await setSession(m.id);return NextResponse.json({member:{...m,phone:undefined}})}

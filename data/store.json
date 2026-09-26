@@ -1,0 +1,51 @@
+{
+  "members": [
+    {
+      "id": "admin-root",
+      "fullName": "مدیر GrowLand",
+      "age": 0,
+      "phone": "+989333167279",
+      "city": "",
+      "focus": "مدیریت",
+      "level": "",
+      "goal": "",
+      "time": "",
+      "threeMonthGoal": "",
+      "whyGrowland": "",
+      "about": "",
+      "skills": [],
+      "xp": 0,
+      "levelNumber": 1,
+      "readyForWork": false,
+      "roadmap": "مدیریت اکوسیستم GrowLand",
+      "growth": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "isAdmin": true,
+      "active": true,
+      "hiddenFromPublic": true,
+      "createdAt": "2026-09-01T00:00:00.000Z"
+    }
+  ],
+  "reports": [],
+  "announcements": [
+    {
+      "id": "a1",
+      "title": "به GrowLand خوش آمدید 🌱",
+      "body": "مسیر رشد شما از همین‌جا شروع می‌شود. پروفایل خود را کامل کنید و اولین گزارش رشدتان را ارسال کنید.",
+      "createdAt": "2026-09-20T10:00:00.000Z"
+    },
+    {
+      "id": "a2",
+      "title": "چالش هفته",
+      "body": "این هفته یک خروجی واقعی بسازید و آن را در گزارش رشد ثبت کنید.",
+      "createdAt": "2026-09-22T10:00:00.000Z"
+    }
+  ]
+}

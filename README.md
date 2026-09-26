@@ -1,169 +1,110 @@
-# GrowLand — Growth Dashboard
+# GrowLand 🌱
 
-> **Growth made visible.** Track your growth, build real skills, and prove your progress.
+یک MVP کامل و mobile-friendly برای GrowLand با **Next.js + React + Node.js API Routes + JSON file storage**.
 
-A professional, modern, and fully responsive Member Directory for GrowLand — a Growth Operating System that turns effort into evidence and evidence into opportunity.
+## امکانات
 
----
+- Landing page با هویت بصری GrowLand و لوگوی ارائه‌شده
+- معرفی حوزه‌های رشد
+- Top Members
+- اطلاعیه‌ها
+- Ranking بر اساس Level و XP
+- ثبت‌نام فارسی و راست‌چین با پیش‌فرض شماره‌های ایران (+98)
+- ورود فقط با شماره تلفن؛ بدون SMS و بدون احراز هویت
+- پنل رشد عضو:
+  - Radar مهارت‌ها
+  - XP هر مهارت
+  - دسته‌بندی مهارت‌ها
+  - نمودار رشد ۷ روز گذشته
+  - Roadmap شخصی
+  - وضعیت «آماده برای کار»
+  - ارسال گزارش به ادمین
+- پنل واحد Admin برای تمام ادمین‌ها:
+  - مشاهده اعضا
+  - مشاهده گزارش‌ها
+  - اضافه/کم کردن XP
+  - تنظیم Level
+  - افزودن/حذف مهارت
+  - تنظیم Roadmap
+  - تغییر وضعیت آماده کار
+  - فعال/غیرفعال کردن عضو
+- ادمین اصلی: `+989333167279`
+- ادمین اصلی می‌تواند سایر اعضا را Admin کند یا عزل کند.
+- ذخیره اطلاعات در `data/store.json` و بدون دیتابیس SQL/NoSQL.
 
-## Overview
-
-GrowLand Dashboard displays every member's growth journey in one place:
-
-- **Level** & **XP** with animated progress bars
-- **Skill Stack** with per-skill levels
-- **Real-time Search** across name, city, goal, and skills
-- **Filters** by level tier, city, and skill
-- **Sorting** by level, XP, or name
-- **Leaderboard** of Top Growers
-- **Profile Modal** with full growth details
-- **Community Stats** calculated live from member data
-- All data managed via a single `users.json` — no database needed
-
----
-
-
-## Progression & XP
-
-GrowLand now uses XP as the single source of truth for progression:
-
-- Level 1 starts at 0 XP and each level requires 1,000 XP.
-- Maximum progression is Level 50 / 50,000 XP.
-- A member's level is calculated automatically from XP, so level/XP mismatches cannot occur.
-- Demo Manager provides quick XP grants (+100, +150, +200, +500, +1,000) and custom XP awards.
-- XP changes are stored in `localStorage` for the current browser and a recent XP activity log is kept per member.
-- `Reset demo data` restores the original JSON dataset.
-
-> **Important:** This repository remains a static Vite/React app. `users.json` is the deploy-time source of truth, while Demo Manager edits are stored only in the current browser via `localStorage`. Anyone who can open the public site can inspect or alter that local demo state, so it must not be treated as an authenticated admin panel. Shared production edits require a server-side API, authentication, and persistent storage.
-
-## Tech Stack
-
-| Tool | Purpose |
-|------|---------|
-| React 18 | UI & Component system |
-| Vite | Build tool & dev server |
-| JavaScript (ES2022) | Logic & utilities |
-| CSS3 (Custom Properties) | Styling & animations |
-| JSON | Data storage |
-| Vercel | Deployment |
-
----
-
-## Installation
+## اجرا
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/growland.git
-cd growland
-
-# Install dependencies
 npm install
-```
-
----
-
-## Development
-
-```bash
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+سپس:
 
----
+```text
+http://localhost:3000
+```
 
-## Build
+برای Build:
 
 ```bash
 npm run build
+npm start
 ```
 
-The production build will be in the `dist/` folder.
+## ورود ادمین اصلی
 
----
+شماره:
 
-## Preview Production Build
-
-```bash
-npm run preview
+```text
++989333167279
 ```
 
----
+در نسخه فعلی، ادمین اصلی به‌صورت Seed شده در `data/store.json` قرار دارد تا بلافاصله بعد از اجرا بتواند وارد پنل شود. این حساب از لیست عمومی اعضا و Ranking مخفی است.
 
-## Deploy to Vercel
+## مدل ذخیره‌سازی
 
-### Option 1: Vercel CLI
+تمام داده‌ها در:
 
-```bash
-npm install -g vercel
-vercel
+```text
+data/store.json
 ```
 
-### Option 2: GitHub Integration
+قرار دارند. این فایل شامل members، reports و announcements است.
 
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Vercel auto-detects Vite — no config needed
-5. Click **Deploy**
+### نکته مهم برای Vercel
 
-### Option 3: Manual via Dashboard
+Vercel در محیط Serverless فایل‌سیستم محلی را برای ذخیره دائمی داده تضمین نمی‌کند؛ بنابراین **JSON file storage برای توسعه، دمو، یا سروری با دیسک پایدار مناسب است، اما برای Production واقعی روی Vercel باید همین ساختار Storage با یک JSON object پایدار مثل Vercel Blob/S3 یا یک سرویس فایل پایدار جایگزین شود.** این پروژه عمداً مطابق درخواست شما هیچ Databaseای ندارد و adapter فعلی مستقیماً `data/store.json` را می‌خواند/می‌نویسد.
 
-1. Run `npm run build`
-2. Drag the `dist/` folder to [vercel.com/new](https://vercel.com/new)
+## امنیت
 
-> **No environment variables or server config needed.** This is a fully static app.
+چون ورود طبق نیاز پروژه فقط با شماره انجام می‌شود و SMS/پسورد وجود ندارد، هر فردی که شماره یک عضو را بداند می‌تواند به حساب او وارد شود. این رفتار عمداً مطابق مشخصات فعلی GrowLand پیاده شده است.
 
----
+برای محیط واقعی پیشنهاد می‌شود حداقل یک عامل دوم (رمز، magic link، OTP یا SSO) اضافه شود.
 
-## How to Manage Members
+## ساختار مهم پروژه
 
-All member data lives in one file:
-
+```text
+app/
+  page.tsx                 # Landing
+  signup/                  # Registration
+  login/                   # Login
+  members/                 # All members + public profile
+  ranking/                 # Ranking
+  dashboard/               # Member growth dashboard
+  admin/                   # Shared admin panel
+  api/                     # Node/Next API routes
+components/
+  Nav.tsx
+  Charts.tsx
+data/
+  store.json               # JSON storage
+lib/
+  auth.ts
+  store.ts
+  types.ts
+  utils.ts
+public/
+  logo.jpg
+  wireframe.png
 ```
-
-
-## Responsive audit — September 2026
-
-The mobile layout was hardened for narrow devices (including 320–400px viewports):
-
-- Removed horizontal page overflow at the root/layout level with `overflow-x: clip` and width constraints.
-- Made containers, cards, grids and flex children shrink safely with `min-width: 0`.
-- Reworked the member profile modal so its width can never exceed the viewport.
-- Prevented modal content, skill rows, history rows, long names and goals from creating horizontal overflow.
-- Added mobile-safe modal sizing with `svh`, safe-area bottom padding and touch scrolling.
-- Optimized the modal header and level badge for narrow screens.
-- Added narrow-screen header adjustments so the navigation cannot push the viewport horizontally.
-- Improved small-screen admin controls so buttons remain usable without overflow.
-- Kept the existing static JSON + localStorage architecture; no database or backend was introduced.
-
-### Verification
-
-`node scripts/validate-data.mjs` passes successfully for the bundled dataset (16 users, version 1).
-
-The supplied environment did not contain the project's installed npm dependencies, so a local `vite build` could not be executed here. The package remains unchanged and is ready to build with `npm install && npm run build` before Vercel deployment.
-
-## Articles system
-
-The dashboard now includes a global Articles section and a lightweight static publishing workflow.
-
-- Article HTML files live in `public/articles/`.
-- `public/articles/article.css` is the shared global article stylesheet.
-- `public/articles/template.html` is the master HTML template for new articles.
-- `src/data/articles.json` controls the article cards shown on the dashboard. Add one metadata entry when publishing a new HTML article.
-- Each article opens as its own static HTML page, so the article body can be edited without touching the React dashboard components.
-
-## Library
-
-The header includes a Library shortcut to:
-`https://grow-land-archive.growland.workers.dev`
-
-## Articles archive
-
-The dashboard home shows only the 3 newest articles, sorted by `date` from `src/data/articles.json`. The `Articles` navigation item opens the full article archive panel, which contains every published article.
-
-Each article remains a standalone HTML file under `public/articles/` and shares the global stylesheet in `public/articles/article.css`.
-
-## Brand asset
-
-The supplied GrowLand logo is stored as `public/brand/growland-logo.png` and is used as the canonical logo in the dashboard header and footer.
