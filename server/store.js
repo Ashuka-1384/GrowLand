@@ -34,7 +34,7 @@ export async function writeDB(db){
   const body = JSON.stringify(db,null,2);
   if(hasBlob()){
     if(!process.env.BLOB_DATA_SECRET && !process.env.JWT_SECRET) throw new Error('BLOB_DATA_SECRET or JWT_SECRET is required for Blob storage');
-    await put(blobPath, encrypt(body), {access:'private', addRandomSuffix:false, contentType:'application/json'});
+    await put(blobPath, encrypt(body), {access:'private', allowOverwrite:true, contentType:'application/json'});
   } else {
     await fs.writeFile(localFile,body,'utf8');
   }

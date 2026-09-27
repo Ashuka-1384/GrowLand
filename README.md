@@ -42,3 +42,7 @@ API: `http://localhost:3001`
 
 ## مدل داده
 `members`, `reports`, `announcements`, و `site` در یک JSON document قرار دارند. XP و Level به‌صورت مدیریتی قابل ویرایش هستند؛ Level پیش‌فرض از XP با قانون هر 1000 XP محاسبه می‌شود.
+
+
+## Vercel Root Directory
+If deploying this repository, set Root Directory to the folder containing package.json and vercel.json. If the project is uploaded as the repository root, leave Root Directory empty.
