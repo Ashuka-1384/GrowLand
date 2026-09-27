@@ -1,0 +1,24 @@
+GrowLand — Vercel Deployment Check — fix-05
+
+CRITICAL:
+The failing log was from GitHub commit edd3276. Do NOT redeploy that old commit.
+Push the fixed project and verify Vercel is building the new commit hash.
+
+Fixed TypeScript error:
+Property 'hiddenFromPublic' does not exist on type 'Member'
+
+Source fixes:
+- lib/types.ts -> Member.hiddenFromPublic: boolean
+- app/api/members/route.ts -> uses isPublicMember()
+- package.json -> Next.js 14.2.35
+
+Windows commands:
+npm.cmd install
+npm.cmd run typecheck
+npm.cmd run build
+
+git add .
+git commit -m "fix: resolve GrowLand Vercel TypeScript build error"
+git push origin main
+
+Then check the Vercel deployment commit hash.
