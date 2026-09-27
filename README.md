@@ -117,3 +117,16 @@ This revision fixes the CSS Autoprefixer warning in `app/globals.css`, adds the 
 ### Important storage note
 
 `data/store.json` is a local JSON store. It is suitable for local development, but Vercel's serverless runtime does not provide durable application storage through the deployed filesystem. A production deployment that must retain registrations, XP, reports, and admin changes needs persistent object storage or a database. This package deliberately keeps the JSON storage contract so the application remains easy to migrate to persistent JSON storage without changing the UI/API contract.
+
+
+### Build preflight
+
+Before deploying, run:
+
+```bash
+npm install
+npm run typecheck
+npm run build
+```
+
+This revision pins Next.js to `14.2.35`, includes the `hiddenFromPublic` field in the member model, fixes UUID session verification, and removes the CSS logical `end` warning from the deployed source. The current CSS no longer contains a `justify-content: end` / `align-items: end` declaration.

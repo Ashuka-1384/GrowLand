@@ -19,14 +19,11 @@ export async function getStore(): Promise<Store> {
     const raw = await fs.readFile(file, 'utf8');
     const parsed: unknown = JSON.parse(raw);
     return isStore(parsed) ? parsed : { ...empty };
-  } catch {
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     await fs.mkdir(path.dirname(file), { recursive: true });
-    try {
-      await fs.access(file);
-    } catch {
-      await fs.writeFile(file, JSON.stringify(empty, null, 2), 'utf8');
-    }
-    return { ...empty, members: [], reports: [], announcements: [] };
+    await fs.writeFile(file, JSON.stringify(empty, null, 2), 'utf8');
+    return { members: [], reports: [], announcements: [] };
   }
 }
 

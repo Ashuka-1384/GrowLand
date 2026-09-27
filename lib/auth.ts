@@ -2,7 +2,14 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { getStore } from './store';
 
-const SECRET = process.env.SESSION_SECRET || 'growland-dev-secret-change-me';
+function getSecret() {
+  const secret = process.env.SESSION_SECRET?.trim();
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('SESSION_SECRET must be configured in production.');
+  }
+  return 'growland-dev-secret-change-me';
+}
 const COOKIE = 'growland_session';
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
@@ -16,7 +23,7 @@ export function normalizePhone(input: string) {
 }
 
 function sign(value: string) {
-  return crypto.createHmac('sha256', SECRET).update(value).digest('hex');
+  return crypto.createHmac('sha256', getSecret()).update(value).digest('hex');
 }
 
 function token(memberId: string) {
@@ -30,7 +37,7 @@ export function verifyToken(value?: string) {
   if (parts.length !== 3) return null;
 
   const [memberId, expiresAt, signature] = parts;
-  if (!memberId || !/^\d+$/.test(expiresAt) || !signature) return null;
+  if (!memberId || !/^[A-Za-z0-9_-]+$/.test(memberId) || !/^\d+$/.test(expiresAt) || !signature) return null;
   if (Number(expiresAt) < Date.now()) return null;
 
   const expected = sign(`${memberId}.${expiresAt}`);
