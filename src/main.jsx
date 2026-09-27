@@ -17,8 +17,19 @@ async function api(path, options={}) {
 function useAuth() {
   const [auth, setAuth] = useState({loading:true, user:null});
   const refresh = async () => {
-    try { const data = await api('/auth/me'); setAuth({loading:false,user:data.user}); }
-    catch { setAuth({loading:false,user:null}); }
+    const token = localStorage.getItem('growland_token');
+    if (!token) {
+      setAuth({loading:false,user:null});
+      return;
+    }
+    try {
+      const data = await api('/auth/me');
+      setAuth({loading:false,user:data.user});
+    } catch {
+      // A stale/expired token should not keep producing a 401 on every page load.
+      localStorage.removeItem('growland_token');
+      setAuth({loading:false,user:null});
+    }
   };
   useEffect(()=>{ refresh(); },[]);
   return { ...auth, refresh };
@@ -102,6 +113,19 @@ function Announcements(){
 function Ranking(){
  const [members,setMembers]=useState([]); useEffect(()=>{api('/public/members').then(d=>setMembers(d.members)).catch(()=>{});},[]);
  const top=members.slice(0,5); return <div className="ranking-list">{top.length?top.map((m,i)=><ProfileRow key={m.id} member={m} index={i}/>):<div className="empty">هنوز عضو فعالی برای نمایش در رتبه‌بندی ثبت نشده است.</div>}</div>
+}
+
+function MiniRanking(){
+ const [members,setMembers]=useState([]);
+ useEffect(()=>{
+   let active=true;
+   api('/public/members').then(d=>{if(active)setMembers(d.members||[]);}).catch(()=>{if(active)setMembers([]);});
+   return ()=>{active=false;};
+ },[]);
+ const top=members.slice(0,3);
+ return <div className="mini-ranking">
+   {top.length ? top.map((m,i)=><ProfileRow key={m.id} member={m} index={i}/>) : <div className="empty">هنوز عضو فعالی برای نمایش در رتبه‌بندی ثبت نشده است.</div>}
+ </div>;
 }
 function ProfileRow({member,index}){return <div className="rank-row"><span className="rank-num">#{index+1}</span><div className="avatar">{initials(member.name)}</div><div className="rank-main"><b>{member.name}</b><span>{member.primarySkill || 'در حال انتخاب مسیر'}</span></div><div className="rank-xp"><b>Lv.{member.level||1}</b><span>{member.xp||0} XP</span></div></div>}
 function initials(name='G'){return name.split(' ').map(x=>x[0]).slice(0,2).join('')}
