@@ -1,16 +1,24 @@
-GrowLand — Vercel Deployment Checklist
+GrowLand — Vercel Deployment Check — fix-05
 
-1. Push this exact project to the GitHub repository connected to Vercel.
-2. In Vercel, connect a PRIVATE Vercel Blob store to the project.
-3. Confirm Production has BLOB_READ_WRITE_TOKEN.
-4. Set Production SESSION_SECRET to a long random value.
-5. Optional: set MASTER_ADMIN_PHONE if the master admin is not +989333167279.
-6. Redeploy the newest commit with “Redeploy” and do not use an older deployment.
-7. Confirm the build starts with npm run build and ends with a successful deployment.
-8. If an old CSS warning appears again, verify the Vercel deployment commit contains app/globals.css from this package and BUILD_VERSION.txt = 2026-09-27-fix-04.
+CRITICAL:
+The failing log was from GitHub commit edd3276. Do NOT redeploy that old commit.
+Push the fixed project and verify Vercel is building the new commit hash.
 
-Expected result:
-- No Autoprefixer “end value has mixed support” warning.
-- TypeScript check completes successfully.
-- Next.js production build completes successfully.
-- First production request can initialize the Blob JSON seed automatically.
+Fixed TypeScript error:
+Property 'hiddenFromPublic' does not exist on type 'Member'
+
+Source fixes:
+- lib/types.ts -> Member.hiddenFromPublic: boolean
+- app/api/members/route.ts -> uses isPublicMember()
+- package.json -> Next.js 14.2.35
+
+Windows commands:
+npm.cmd install
+npm.cmd run typecheck
+npm.cmd run build
+
+git add .
+git commit -m "fix: resolve GrowLand Vercel TypeScript build error"
+git push origin main
+
+Then check the Vercel deployment commit hash.
