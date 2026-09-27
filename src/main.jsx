@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import './styles.css';
 
-const API = import.meta.env.VITE_API_URL || '/api';
+const API = String(import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const DEFAULT_SKILLS = ['طراحی','برنامه‌نویسی','تولید محتوا','فروش و مذاکره','مهارت‌های فردی','کسب‌وکار','نویسندگی','زبان'];
 let publicMembersRequest = null;
 function getPublicMembers(){

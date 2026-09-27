@@ -10,7 +10,22 @@ const PORT=process.env.PORT||3001;
 const isProduction=process.env.NODE_ENV==='production';
 const JWT_SECRET=process.env.JWT_SECRET || (isProduction ? '' : 'local-development-secret');
 const ADMIN_PHONE=normalizePhone(process.env.ADMIN_PHONE||'');
-const allowedOrigins=(process.env.CLIENT_URL||'').split(',').map(x=>x.trim()).filter(Boolean);
+function normalizeOrigin(value='') {
+  try { return new URL(String(value).trim()).origin.replace(/\/$/, ''); }
+  catch { return ''; }
+}
+const allowedOrigins=(process.env.CLIENT_URL||'').split(',').map(normalizeOrigin).filter(Boolean);
+function requestHost(req) {
+  return String(req.headers['x-forwarded-host'] || req.get('host') || '').split(',')[0].trim().toLowerCase();
+}
+function isSameOrigin(req, origin) {
+  try {
+    const u = new URL(origin);
+    return u.host.toLowerCase() === requestHost(req) && (u.protocol === 'https:' || u.protocol === 'http:');
+  } catch {
+    return false;
+  }
+}
 
 if(isProduction && !process.env.JWT_SECRET){
   throw new Error('JWT_SECRET must be configured in production.');
@@ -42,13 +57,15 @@ app.use((req,res,next)=>{
   res.setHeader('Permissions-Policy','camera=(), microphone=(), geolocation=()');
   next();
 });
+app.use((req,res,next)=>{
+  const origin=req.headers.origin;
+  if(!origin || isSameOrigin(req,origin) || allowedOrigins.includes(normalizeOrigin(origin)) || (!isProduction && allowedOrigins.length===0)) return next();
+  return next(new Error('Origin not allowed by CORS'));
+});
 app.use(cors({
-  origin(origin,callback){
-    if(!origin) return callback(null,true);
-    if(allowedOrigins.includes(origin)) return callback(null,true);
-    if(!isProduction && allowedOrigins.length===0) return callback(null,true);
-    return callback(new Error('Origin not allowed by CORS'));
-  },
+  // The middleware immediately above has already enforced the allowlist/same-origin rule.
+  // Here we only reflect the accepted origin so browsers receive the required CORS headers.
+  origin:true,
   credentials:true
 }));
 app.use(express.json({limit:'1mb',strict:true}));

@@ -24,3 +24,16 @@
 - `server/index.js` با `node --check` بررسی شد.
 - `server/store.js` با `node --check` بررسی شد.
 - نصب dependency و build کامل در محیط بررسی به دلیل عدم دسترسی/timeout رجیستری npm قابل اجرا نبود؛ بنابراین این مورد در گزارش نهایی صریحاً ذکر می‌شود و ادعای build موفق ارائه نمی‌شود.
+
+## Fix Pass 3 – Authentication / CORS
+- اصلاح CORS برای استقرارهای same-origin مانند Vercel؛ Origin فعلی دامنه API با Host/X-Forwarded-Host تطبیق داده می‌شود.
+- `CLIENT_URL` به‌صورت نرمال‌شده و با پشتیبانی از چند دامنه بررسی می‌شود.
+- پس از عبور از بررسی Origin، هدرهای CORS به‌درستی برای مرورگر منعکس می‌شوند.
+- توکن منقضی یا ساخته‌شده با Secret قبلی در `/api/auth/me` با وضعیت 401 پاک می‌شود و UI به صفحه ورود برمی‌گردد.
+- `VITE_API_URL` در فرانت به‌صورت ایمن از `/` انتهایی پاک‌سازی می‌شود تا URLهای API دو `/` نداشته باشند.
+
+## Verification – Pass 3
+- `node --check server/index.js`: OK
+- `node --check server/store.js`: OK
+- Frontend JSX parsing: verified in previous pass.
+- Runtime integration test in this environment could not be executed because `node_modules` is not installed in the provided archive and package installation was unavailable in the execution environment.
