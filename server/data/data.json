@@ -1,0 +1,37 @@
+{
+  "settings": {
+    "brand": "GrowLand",
+    "adminPhone": "+989333167279",
+    "levelXp": 1000
+  },
+  "announcements": [
+    {"id":"a1","title":"شروع چالش رشد ۷ روزه","body":"در هفت روز آینده هر روز یک خروجی واقعی ثبت کنید.","date":"2026-09-27","tag":"Challenge"},
+    {"id":"a2","title":"جلسه ارزیابی اعضا","body":"گزارش‌های هفتگی را تا پایان پنج‌شنبه ارسال کنید.","date":"2026-09-25","tag":"Growth"},
+    {"id":"a3","title":"کتابخانه GrowLand به‌روزرسانی شد","body":"منابع جدید در حوزه‌های برنامه‌نویسی، طراحی و کسب‌وکار اضافه شد.","date":"2026-09-22","tag":"Library"}
+  ],
+  "members": [
+    {
+      "id":"m1","fullName":"آرین محمدی","age":21,"phone":"+989120001111","city":"تهران","focus":"برنامه‌نویسی","level":7,"readyForWork":true,"status":"approved","avatar":"","goal":"ساخت نمونه‌کار و ورود به بازار کار","weeklyHours":"۵ تا ۱۰ ساعت","bio":"من کسی هستم که هر روز یک قدم واقعی جلو می‌روم.",
+      "skills":[{"id":"s1","name":"JavaScript","category":"Programming","xp":820},{"id":"s2","name":"React","category":"Programming","xp":650},{"id":"s3","name":"Communication","category":"Personal","xp":420},{"id":"s4","name":"English","category":"Languages","xp":510}],
+      "growth":[58,61,64,66,70,74,79],
+      "roadmap":"هفته ۱: ساخت یک Landing Page. هفته ۲: تکمیل داشبورد React. هفته ۳: انتشار نمونه‌کار و دریافت بازخورد.",
+      "reports":[{"id":"r1","date":"2026-09-26","title":"گزارش هفتگی","text":"یک داشبورد React ساختم و برای آن تست نوشتم.","status":"reviewed"}]
+    },
+    {
+      "id":"m2","fullName":"سارا کریمی","age":22,"phone":"+989120002222","city":"شیراز","focus":"طراحی","level":6,"readyForWork":true,"status":"approved","avatar":"","goal":"ساخت پورتفولیو حرفه‌ای","weeklyHours":"۳ تا ۵ ساعت","bio":"من کسی هستم که ایده‌ها را به تجربه تبدیل می‌کنم.",
+      "skills":[{"id":"s5","name":"UI Design","category":"Design","xp":760},{"id":"s6","name":"Figma","category":"Design","xp":690},{"id":"s7","name":"Presentation","category":"Personal","xp":390}],
+      "growth":[46,49,55,57,63,66,72],"roadmap":"دو کیس‌استادی جدید بساز، بازخورد بگیر و نسخه نهایی پورتفولیو را منتشر کن.","reports":[]
+    },
+    {
+      "id":"m3","fullName":"امیرحسین رضایی","age":20,"phone":"+989120003333","city":"مشهد","focus":"تولید محتوا","level":5,"readyForWork":false,"status":"approved","avatar":"","goal":"توسعه مهارت تولید محتوای ویدیویی","weeklyHours":"۵ تا ۱۰ ساعت","bio":"من کسی هستم که با ساختن یاد می‌گیرم.",
+      "skills":[{"id":"s8","name":"Video","category":"Content","xp":610},{"id":"s9","name":"Copywriting","category":"Writing","xp":500},{"id":"s10","name":"Marketing","category":"Business","xp":350}],
+      "growth":[39,42,44,48,51,53,58],"roadmap":"سه محتوای کوتاه تولید کن، نتایج را تحلیل کن و یک فرمت برنده انتخاب کن.","reports":[]
+    },
+    {
+      "id":"m4","fullName":"نگار احمدی","age":19,"phone":"+989120004444","city":"تبریز","focus":"فروش و مذاکره","level":4,"readyForWork":false,"status":"approved","avatar":"","goal":"تقویت مذاکره و فروش","weeklyHours":"کمتر از ۳ ساعت","bio":"من کسی هستم که از گفت‌وگو برای ساختن فرصت استفاده می‌کنم.",
+      "skills":[{"id":"s11","name":"Negotiation","category":"Sales","xp":470},{"id":"s12","name":"Sales","category":"Sales","xp":390},{"id":"s13","name":"Communication","category":"Personal","xp":410}],
+      "growth":[31,34,36,39,43,45,49],"roadmap":"هر هفته دو سناریوی مذاکره تمرین کن و نتیجه را در گزارش ثبت کن.","reports":[]
+    }
+  ],
+  "reports": []
+}

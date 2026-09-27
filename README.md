@@ -1,125 +1,46 @@
-# GrowLand 🌱
+# GrowLand — React + Node.js + JSON
 
-یک MVP کامل و mobile-friendly برای GrowLand با **Next.js + React + Node.js API Routes + Vercel Blob / local JSON seed**.
+A mobile-first GrowLand MVP built with **React (Vite)** on the client and **Node.js + Express** on the server. It intentionally uses **no database**. All application data is stored in `server/data/data.json`.
 
-## امکانات
+## Included
+- Landing/about section
+- GrowLand activity domains
+- Top members
+- Announcements
+- Member ranking and all-members directory
+- Passwordless Iranian phone sign-in/sign-up (`+98` default)
+- Member growth dashboard
+- Skill XP, radar chart, 7-day growth chart
+- Roadmap/plan and “ready for work” status
+- Admin reports and member management
+- XP/level/skill management
+- Admin promotion/removal by the first owner admin
+- JSON persistence
 
-- Landing page با هویت بصری GrowLand و لوگوی ارائه‌شده
-- معرفی حوزه‌های رشد
-- Top Members
-- اطلاعیه‌ها
-- Ranking بر اساس Level و XP
-- ثبت‌نام فارسی و راست‌چین با پیش‌فرض شماره‌های ایران (+98)
-- ورود فقط با شماره تلفن؛ بدون SMS و بدون احراز هویت
-- پنل رشد عضو:
-  - Radar مهارت‌ها
-  - XP هر مهارت
-  - دسته‌بندی مهارت‌ها
-  - نمودار رشد ۷ روز گذشته
-  - Roadmap شخصی
-  - وضعیت «آماده برای کار»
-  - ارسال گزارش به ادمین
-- پنل واحد Admin برای تمام ادمین‌ها:
-  - مشاهده اعضا
-  - مشاهده گزارش‌ها
-  - اضافه/کم کردن XP
-  - تنظیم Level
-  - افزودن/حذف مهارت
-  - تنظیم Roadmap
-  - تغییر وضعیت آماده کار
-  - فعال/غیرفعال کردن عضو
-- ادمین اصلی: `+989333167279`
-- ادمین اصلی می‌تواند سایر اعضا را Admin کند یا عزل کند.
-- ذخیره اطلاعات در `data/store.json` و بدون دیتابیس SQL/NoSQL.
-
-## اجرا
-
+## Run locally
 ```bash
 npm install
 npm run dev
 ```
 
-سپس:
+Client: `http://localhost:5173`
+API: `http://localhost:4000`
 
-```text
-http://localhost:3000
-```
-
-برای Build:
-
+For a production client build:
 ```bash
 npm run build
-npm start
 ```
 
-## ورود ادمین اصلی
+## First admin
+The initial admin is seeded with:
+`+989333167279`
 
-شماره:
+There is intentionally **no SMS verification or password** in this MVP, per the project requirements.
 
-```text
-+989333167279
-```
+## Important Vercel note
+This project is intentionally database-free. Vercel serverless functions do **not** provide durable writable local filesystem storage between invocations. Therefore `data.json` is suitable for local/self-hosted Node deployment, but durable writes on Vercel require an external persistent storage service (which would conflict with the strict “no database” requirement).
 
-در نسخه فعلی، ادمین اصلی به‌صورت Seed شده در `data/store.json` قرار دارد تا بلافاصله بعد از اجرا بتواند وارد پنل شود. این حساب از لیست عمومی اعضا و Ranking مخفی است.
+The code is structured so the API can later be moved to a persistent Node host without changing the React UI.
 
-## مدل ذخیره‌سازی
-
-این پروژه دو حالت دارد:
-
-- توسعه محلی: `data/store.json`
-- Vercel Production: یک فایل JSON در **Vercel Blob** با دسترسی Private
-
-در Vercel، فایل‌سیستم Function قابل اتکا برای ذخیره دائمی نیست؛ بنابراین اطلاعات ثبت‌نام، XP، گزارش‌ها و تغییرات ادمین در Blob نگهداری می‌شوند. این دقیقاً برای این پروژه مناسب‌تر از نوشتن روی filesystem محلی است.
-
-برای فعال‌شدن Storage در Vercel، یک Blob Store به پروژه وصل کنید. Vercel در صورت اتصال Store متغیر `BLOB_READ_WRITE_TOKEN` را به پروژه اضافه می‌کند.
-
-## امنیت
-
-چون ورود طبق نیاز پروژه فقط با شماره انجام می‌شود و SMS/پسورد وجود ندارد، هر فردی که شماره یک عضو را بداند می‌تواند به حساب او وارد شود. این رفتار عمداً مطابق مشخصات فعلی GrowLand پیاده شده است.
-
-برای محیط واقعی پیشنهاد می‌شود حداقل یک عامل دوم (رمز، magic link، OTP یا SSO) اضافه شود.
-
-## ساختار مهم پروژه
-
-```text
-app/
-  page.tsx                 # Landing
-  signup/                  # Registration
-  login/                   # Login
-  members/                 # All members + public profile
-  ranking/                 # Ranking
-  dashboard/               # Member growth dashboard
-  admin/                   # Shared admin panel
-  api/                     # Node/Next API routes
-components/
-  Nav.tsx
-  Charts.tsx
-data/
-  store.json               # JSON storage
-lib/
-  auth.ts
-  store.ts
-  types.ts
-  utils.ts
-public/
-  logo.jpg
-  wireframe.png
-```
-
-## Vercel production notes
-
-- Next.js is pinned to `14.2.35`, which is the patched 14.x release identified by the official Next.js December 11, 2025 security update.
-- Vercel production storage uses Vercel Blob; local JSON remains the development seed.
-- `SESSION_SECRET` and `BLOB_READ_WRITE_TOKEN` must exist in Production.
-- The current `globals.css` contains no `justify-content: end`, `align-items: end`, or `align-self: end` declaration.
-- Public member responses omit phone numbers and private self-description fields.
-- Stateful mutation APIs use a store-update path designed to avoid silently overwriting concurrent Blob updates.
-
-### Build preflight
-
-```bash
-npm install
-npm run typecheck
-npm run build
-```
-
+## Vercel deployment configuration
+A `vercel.json` is included. The frontend can be built by Vercel and the Express API can run as a Vercel Node function. **However, JSON writes are not durable on Vercel serverless storage.** This is a platform constraint, not a code bug. If the strict no-database rule remains, use a persistent Node host for the API and Vercel for the frontend, setting `VITE_API_URL` to the API URL.
