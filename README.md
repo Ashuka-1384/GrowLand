@@ -112,7 +112,11 @@ public/
 
 ## Vercel build hardening
 
-This revision fixes the CSS Autoprefixer warning in `app/globals.css`, adds the missing `hiddenFromPublic` field to the `Member` type, hardens session-token verification, and marks JSON-backed pages as dynamic so they are not incorrectly frozen at build time.
+This revision fixes the CSS Autoprefixer warning in `app/globals.css`, adds and safely handles the `hiddenFromPublic` field in the member model, hardens session-token verification, and marks JSON-backed pages as dynamic so they are not incorrectly frozen at build time.
+
+### TypeScript compatibility guard
+
+Public member filtering goes through `isPublicMember()` rather than accessing `hiddenFromPublic` directly from every route/page. This keeps the build compatible with older member records/type snapshots while preserving the hidden-member behavior when the field exists.
 
 ### Important storage note
 
@@ -129,4 +133,4 @@ npm run typecheck
 npm run build
 ```
 
-This revision pins Next.js to `14.2.35`, includes the `hiddenFromPublic` field in the member model, fixes UUID session verification, and removes the CSS logical `end` warning from the deployed source. The current CSS no longer contains a `justify-content: end` / `align-items: end` declaration.
+This revision pins Next.js to `14.2.35`, includes optional `hiddenFromPublic` support in the member model, fixes UUID session verification, and removes the CSS logical `end` warning from the deployed source. The current CSS no longer contains a `justify-content: end` / `align-items: end` declaration.

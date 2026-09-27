@@ -1,0 +1,6 @@
+1) Replace the repository source with the contents of this ZIP.
+2) Commit ALL changed files, especially lib/types.ts and lib/store.ts.
+3) In GitHub, verify BUILD_VERSION.txt exists and says 2026-09-27-fix-02.
+4) In Vercel, confirm the Production deployment is using that exact commit.
+5) SESSION_SECRET must be set in Vercel Environment Variables for Production.
+6) Run a new deployment after the commit. Do not redeploy the old commit.

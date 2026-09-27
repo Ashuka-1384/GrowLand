@@ -27,6 +27,10 @@ export async function getStore(): Promise<Store> {
   }
 }
 
+export function isPublicMember(member: { active?: boolean; hiddenFromPublic?: boolean }): boolean {
+  return member.active !== false && member.hiddenFromPublic !== true;
+}
+
 export async function saveStore(store: Store): Promise<void> {
   writeQueue = writeQueue.then(async () => {
     await fs.mkdir(path.dirname(file), { recursive: true });

@@ -1,0 +1,15 @@
+GrowLand Vercel Build Source
+Version: 2026-09-27-fix-02
+Purpose: eliminate the hiddenFromPublic Member type mismatch and keep public-member filtering type-safe across the app.
+Critical files:
+- lib/types.ts
+- lib/store.ts
+- app/api/members/route.ts
+- app/api/members/[id]/route.ts
+- app/page.tsx
+- app/ranking/page.tsx
+- app/members/page.tsx
+- app/members/[id]/page.tsx
+
+Expected Vercel build command:
+npm run build
