@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { getStore } from '@/lib/store';
 import { initials } from '@/lib/utils';

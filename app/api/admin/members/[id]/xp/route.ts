@@ -1,2 +1,4 @@
+export const runtime = 'nodejs';
+
 import {NextResponse} from 'next/server'; import {requireAdmin} from '@/lib/auth'; import {getStore,saveStore,publicMember} from '@/lib/store'; import {levelFromXp} from '@/lib/utils';
 export async function POST(req:Request,{params}:{params:{id:string}}){try{await requireAdmin();const {skillId,delta}=await req.json();const s=await getStore();const m=s.members.find(x=>x.id===params.id);if(!m)return NextResponse.json({error:'Not found'},{status:404});const n=Number(delta)||0;if(skillId){const sk=m.skills.find(x=>x.id===skillId);if(!sk)return NextResponse.json({error:'Skill not found'},{status:404});sk.xp=Math.max(0,sk.xp+n);m.xp=m.skills.reduce((a,x)=>a+x.xp,0)}else m.xp=Math.max(0,m.xp+n);m.levelNumber=levelFromXp(m.xp);m.growth=[...m.growth.slice(-6),m.xp];await saveStore(s);return NextResponse.json({member:publicMember(m)})}catch(e){return NextResponse.json({error:'دسترسی ادمین لازم است.'},{status:403})}}

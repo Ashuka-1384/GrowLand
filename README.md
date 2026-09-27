@@ -108,3 +108,12 @@ public/
   logo.jpg
   wireframe.png
 ```
+
+
+## Vercel build hardening
+
+This revision fixes the CSS Autoprefixer warning in `app/globals.css`, adds the missing `hiddenFromPublic` field to the `Member` type, hardens session-token verification, and marks JSON-backed pages as dynamic so they are not incorrectly frozen at build time.
+
+### Important storage note
+
+`data/store.json` is a local JSON store. It is suitable for local development, but Vercel's serverless runtime does not provide durable application storage through the deployed filesystem. A production deployment that must retain registrations, XP, reports, and admin changes needs persistent object storage or a database. This package deliberately keeps the JSON storage contract so the application remains easy to migrate to persistent JSON storage without changing the UI/API contract.
