@@ -1,4 +1,38 @@
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-import {NextResponse} from 'next/server'; import {requireAdmin} from '@/lib/auth'; import {getStore,saveStore,publicMember} from '@/lib/store'; import {levelFromXp} from '@/lib/utils';
-export async function PATCH(req:Request,{params}:{params:{id:string}}){try{await requireAdmin();const b=await req.json();const s=await getStore();const i=s.members.findIndex(m=>m.id===params.id);if(i<0)return NextResponse.json({error:'Not found'},{status:404});const m=s.members[i];if(typeof b.xp==='number'){m.xp=Math.max(0,b.xp);m.levelNumber=levelFromXp(m.xp)}if(typeof b.levelNumber==='number')m.levelNumber=Math.max(1,Math.floor(b.levelNumber));if(typeof b.readyForWork==='boolean')m.readyForWork=b.readyForWork;if(typeof b.roadmap==='string')m.roadmap=b.roadmap;if(typeof b.active==='boolean')m.active=b.active;await saveStore(s);return NextResponse.json({member:publicMember(m)})}catch(e:any){return NextResponse.json({error:e.message==='FORBIDDEN'?'دسترسی ادمین لازم است.':'Unauthorized'},{status:403})}}
+import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth';
+import { updateStore, adminMember } from '@/lib/store';
+import { levelFromXp } from '@/lib/utils';
+
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  try {
+    await requireAdmin();
+    const body = await req.json();
+    const member = await updateStore(store => {
+      const target = store.members.find(m => m.id === params.id);
+      if (!target) throw new Error('NOT_FOUND');
+      if (typeof body?.xp === 'number' && Number.isFinite(body.xp)) {
+        target.xp = Math.max(0, Math.floor(body.xp));
+        target.levelNumber = levelFromXp(target.xp);
+      }
+      if (typeof body?.levelNumber === 'number' && Number.isFinite(body.levelNumber)) {
+        target.levelNumber = Math.max(1, Math.floor(body.levelNumber));
+      }
+      if (typeof body?.readyForWork === 'boolean') target.readyForWork = body.readyForWork;
+      if (typeof body?.roadmap === 'string') target.roadmap = body.roadmap.trim();
+      if (typeof body?.active === 'boolean') target.active = body.active;
+      return target;
+    });
+    return NextResponse.json({ member: adminMember(member) }, { headers: { 'Cache-Control': 'no-store' } });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'FORBIDDEN') {
+      return NextResponse.json({ error: 'دسترسی ادمین لازم است.' }, { status: 403 });
+    }
+    if (error instanceof Error && error.message === 'NOT_FOUND') {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+}

@@ -1,4 +1,27 @@
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-import {NextResponse} from 'next/server'; import {currentMember} from '@/lib/auth'; import {getStore,saveStore} from '@/lib/store'; export async function GET(){const m=await currentMember();if(!m)return NextResponse.json({error:'Unauthorized'},{status:401});return NextResponse.json({member:{...m,phone:undefined}})}
-export async function PATCH(req:Request){const m=await currentMember();if(!m)return NextResponse.json({error:'Unauthorized'},{status:401});const b=await req.json();const s=await getStore();const i=s.members.findIndex(x=>x.id===m.id);if(i<0)return NextResponse.json({error:'Not found'},{status:404});s.members[i].readyForWork=!!b.readyForWork;await saveStore(s);return NextResponse.json({member:{...s.members[i],phone:undefined}})}
+import { NextResponse } from 'next/server';
+import { currentMember, sessionMember } from '@/lib/auth';
+import { updateStore } from '@/lib/store';
+
+export async function GET() {
+  const member = await currentMember();
+  if (!member) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  return NextResponse.json({ member: sessionMember(member) }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
+export async function PATCH(req: Request) {
+  const current = await currentMember();
+  if (!current) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const body = await req.json();
+  const member = await updateStore(store => {
+    const target = store.members.find(x => x.id === current.id && x.active !== false);
+    if (!target) throw new Error('NOT_FOUND');
+    target.readyForWork = Boolean(body?.readyForWork);
+    return target;
+  });
+
+  return NextResponse.json({ member: sessionMember(member) }, { headers: { 'Cache-Control': 'no-store' } });
+}

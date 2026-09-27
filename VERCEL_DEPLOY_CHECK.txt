@@ -1,6 +1,9 @@
-1) Replace the repository source with the contents of this ZIP.
-2) Commit ALL changed files, especially lib/types.ts and lib/store.ts.
-3) In GitHub, verify BUILD_VERSION.txt exists and says 2026-09-27-fix-02.
-4) In Vercel, confirm the Production deployment is using that exact commit.
-5) SESSION_SECRET must be set in Vercel Environment Variables for Production.
-6) Run a new deployment after the commit. Do not redeploy the old commit.
+1) Replace the GitHub repository source with the contents of this ZIP.
+2) Commit ALL changed files and push to the branch connected to Vercel.
+3) In Vercel, connect a Blob store to the same project and ensure BLOB_READ_WRITE_TOKEN is available in Production.
+4) Set SESSION_SECRET in Vercel Production to a long random secret.
+5) Set MASTER_ADMIN_PHONE only if you want to change the seeded master admin phone.
+6) Verify Vercel is deploying the NEW commit containing BUILD_VERSION.txt version 2026-09-27-fix-03.
+7) Deploy with the project framework detected as Next.js and build command npm run build.
+8) After deployment test: /api/health, signup, logout/login, /dashboard, /admin, XP update, skill add/delete, report submit/review.
+9) Do not use data/store.json as a production writable database; it remains only as the local seed/development source.

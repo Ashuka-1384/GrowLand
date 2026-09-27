@@ -1,6 +1,11 @@
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { getStore } from './store';
+import type { Member, SessionMember } from './types';
+
+export const MASTER_ADMIN_PHONE = process.env.MASTER_ADMIN_PHONE?.trim() || '+989333167279';
+const COOKIE = 'growland_session';
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
 function getSecret() {
   const secret = process.env.SESSION_SECRET?.trim();
@@ -10,8 +15,6 @@ function getSecret() {
   }
   return 'growland-dev-secret-change-me';
 }
-const COOKIE = 'growland_session';
-const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
 export function normalizePhone(input: string) {
   let p = String(input || '').replace(/[^\d+]/g, '');
@@ -47,6 +50,11 @@ export function verifyToken(value?: string) {
   if (!crypto.timingSafeEqual(expectedBuffer, actualBuffer)) return null;
 
   return memberId;
+}
+
+export function sessionMember(member: Member): SessionMember {
+  const { phone: _phone, ...safe } = member;
+  return { ...safe, isMasterAdmin: member.phone === MASTER_ADMIN_PHONE };
 }
 
 export async function setSession(memberId: string) {

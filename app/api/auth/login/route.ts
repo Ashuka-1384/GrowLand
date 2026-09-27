@@ -1,8 +1,9 @@
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { getStore } from '@/lib/store';
-import { normalizePhone, setSession } from '@/lib/auth';
+import { normalizePhone, setSession, sessionMember } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const store = await getStore();
-    const member = store.members.find(item => item.phone === phone);
+    const member = store.members.find(item => item.phone === phone && item.active !== false);
     if (!member) {
       return NextResponse.json(
         { error: 'این شماره عضو GrowLand نیست. ابتدا ثبت‌نام کنید.' },
@@ -22,8 +23,7 @@ export async function POST(req: Request) {
     }
 
     await setSession(member.id);
-    const { phone: _phone, ...safeMember } = member;
-    return NextResponse.json({ member: safeMember });
+    return NextResponse.json({ member: sessionMember(member) }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
     return NextResponse.json({ error: 'درخواست نامعتبر است.' }, { status: 400 });
   }

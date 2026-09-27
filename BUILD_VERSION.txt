@@ -1,15 +1,21 @@
 GrowLand Vercel Build Source
-Version: 2026-09-27-fix-02
-Purpose: eliminate the hiddenFromPublic Member type mismatch and keep public-member filtering type-safe across the app.
+Version: 2026-09-27-fix-03
+Purpose: remove the stale CSS warning source, make admin-session state explicit, harden API validation, and replace Vercel-unsafe persistent filesystem writes with Vercel Blob storage while retaining local JSON for development.
 Critical files:
-- lib/types.ts
 - lib/store.ts
-- app/api/members/route.ts
-- app/api/members/[id]/route.ts
-- app/page.tsx
-- app/ranking/page.tsx
-- app/members/page.tsx
-- app/members/[id]/page.tsx
+- lib/auth.ts
+- lib/types.ts
+- app/api/auth/*.ts
+- app/api/me/route.ts
+- app/api/reports/route.ts
+- app/api/admin/**/*.ts
+- app/signup/page.tsx
+- app/admin/page.tsx
+- app/globals.css
+
+Production storage:
+- Vercel: Vercel Blob via BLOB_READ_WRITE_TOKEN
+- Local development: data/store.json
 
 Expected Vercel build command:
 npm run build

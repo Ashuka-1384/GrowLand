@@ -5,6 +5,8 @@ export type Member = {
   skills: Skill[]; xp: number; levelNumber: number; readyForWork: boolean; roadmap: string;
   growth: number[]; isAdmin: boolean; active: boolean; hiddenFromPublic?: boolean; createdAt: string;
 };
+export type PublicMember = Pick<Member, 'id' | 'fullName' | 'age' | 'city' | 'focus' | 'level' | 'goal' | 'time' | 'skills' | 'xp' | 'levelNumber' | 'readyForWork' | 'roadmap' | 'growth' | 'createdAt'>;
+export type SessionMember = Omit<Member, 'phone'> & { isMasterAdmin: boolean };
 export type Report = { id: string; memberId: string; text: string; createdAt: string; status: 'new'|'reviewed' };
 export type Announcement = { id: string; title: string; body: string; createdAt: string };
 export type Store = { members: Member[]; reports: Report[]; announcements: Announcement[] };
