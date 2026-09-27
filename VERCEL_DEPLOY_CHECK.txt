@@ -1,9 +1,16 @@
-1) Replace the GitHub repository source with the contents of this ZIP.
-2) Commit ALL changed files and push to the branch connected to Vercel.
-3) In Vercel, connect a Blob store to the same project and ensure BLOB_READ_WRITE_TOKEN is available in Production.
-4) Set SESSION_SECRET in Vercel Production to a long random secret.
-5) Set MASTER_ADMIN_PHONE only if you want to change the seeded master admin phone.
-6) Verify Vercel is deploying the NEW commit containing BUILD_VERSION.txt version 2026-09-27-fix-03.
-7) Deploy with the project framework detected as Next.js and build command npm run build.
-8) After deployment test: /api/health, signup, logout/login, /dashboard, /admin, XP update, skill add/delete, report submit/review.
-9) Do not use data/store.json as a production writable database; it remains only as the local seed/development source.
+GrowLand — Vercel Deployment Checklist
+
+1. Push this exact project to the GitHub repository connected to Vercel.
+2. In Vercel, connect a PRIVATE Vercel Blob store to the project.
+3. Confirm Production has BLOB_READ_WRITE_TOKEN.
+4. Set Production SESSION_SECRET to a long random value.
+5. Optional: set MASTER_ADMIN_PHONE if the master admin is not +989333167279.
+6. Redeploy the newest commit with “Redeploy” and do not use an older deployment.
+7. Confirm the build starts with npm run build and ends with a successful deployment.
+8. If an old CSS warning appears again, verify the Vercel deployment commit contains app/globals.css from this package and BUILD_VERSION.txt = 2026-09-27-fix-04.
+
+Expected result:
+- No Autoprefixer “end value has mixed support” warning.
+- TypeScript check completes successfully.
+- Next.js production build completes successfully.
+- First production request can initialize the Blob JSON seed automatically.

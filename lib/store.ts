@@ -43,8 +43,29 @@ async function readLocalStore(): Promise<Store> {
 async function readBlobStore() {
   const token = requireBlobToken();
   const result = await get(blobPath, { access: 'private', token, useCache: false });
-  if (!result || result.statusCode !== 200 || !result.stream) {
-    return { store: await readLocalStore(), etag: undefined as string | undefined };
+  if (!result) {
+    const seed = await readLocalStore();
+    try {
+      const created = await put(blobPath, JSON.stringify(seed, null, 2), {
+        access: 'private',
+        token,
+        allowOverwrite: false,
+        contentType: 'application/json',
+        cacheControlMaxAge: 60,
+      });
+      return { store: seed, etag: created.etag };
+    } catch {
+      // Another Vercel Function may have created the seed concurrently.
+      const retry = await get(blobPath, { access: 'private', token, useCache: false });
+      if (!retry || retry.statusCode !== 200 || !retry.stream) throw new Error('GrowLand storage could not be initialized.');
+      const raw = await new Response(retry.stream).text();
+      const parsed: unknown = JSON.parse(raw);
+      if (!isStore(parsed)) throw new Error('GrowLand storage contains an invalid data shape.');
+      return { store: parsed, etag: retry.blob.etag };
+    }
+  }
+  if (result.statusCode !== 200 || !result.stream) {
+    throw new Error('GrowLand storage returned an unexpected response.');
   }
   const raw = await new Response(result.stream).text();
   const parsed: unknown = JSON.parse(raw);

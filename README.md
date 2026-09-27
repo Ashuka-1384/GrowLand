@@ -1,6 +1,6 @@
 # GrowLand 🌱
 
-یک MVP کامل و mobile-friendly برای GrowLand با **Next.js + React + Node.js API Routes + JSON file storage**.
+یک MVP کامل و mobile-friendly برای GrowLand با **Next.js + React + Node.js API Routes + Vercel Blob / local JSON seed**.
 
 ## امکانات
 
