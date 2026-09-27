@@ -1,46 +1,44 @@
-# GrowLand — React + Node.js + JSON
+# GrowLand — React + Node.js + JSON/Vercel Blob
 
-A mobile-first GrowLand MVP built with **React (Vite)** on the client and **Node.js + Express** on the server. It intentionally uses **no database**. All application data is stored in `server/data/data.json`.
+نسخه MVP یکپارچه GrowLand بدون دیتابیس رابطه‌ای.
 
-## Included
-- Landing/about section
-- GrowLand activity domains
-- Top members
-- Announcements
-- Member ranking and all-members directory
-- Passwordless Iranian phone sign-in/sign-up (`+98` default)
-- Member growth dashboard
-- Skill XP, radar chart, 7-day growth chart
-- Roadmap/plan and “ready for work” status
-- Admin reports and member management
-- XP/level/skill management
-- Admin promotion/removal by the first owner admin
-- JSON persistence
+## Stack
+- React 19 + Vite
+- React Router
+- Node.js + Express 5
+- JSON storage در توسعه
+- Vercel Blob در Production در صورت تنظیم `BLOB_READ_WRITE_TOKEN`
+- JWT برای session؛ بدون SMS و احراز هویت تلفنی
+- Responsive / mobile-first UI
 
-## Run locally
+## اجرا در لوکال
 ```bash
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-Client: `http://localhost:5173`
-API: `http://localhost:4000`
+Frontend: `http://localhost:5173`
+API: `http://localhost:3001`
 
-For a production client build:
-```bash
-npm run build
-```
+## ورود ادمین اصلی
+شماره اولیه: `+989333167279`
+این شماره از `ADMIN_PHONE` خوانده می‌شود و بهتر است در Vercel Environment Variables تنظیم شود.
 
-## First admin
-The initial admin is seeded with:
-`+989333167279`
+## Deploy روی Vercel
+1. پروژه را به GitHub وصل یا با Vercel CLI deploy کنید.
+2. Environment Variables:
+   - `JWT_SECRET`
+   - `ADMIN_PHONE`
+   - `BLOB_READ_WRITE_TOKEN`
+   - `BLOB_DATA_SECRET`
+3. Build command: `npm run build`
+4. `vercel.json` مسیرهای `/api/*` را به Express serverless و باقی مسیرها را به Vite SPA می‌فرستد.
 
-There is intentionally **no SMS verification or password** in this MVP, per the project requirements.
+### درباره ذخیره‌سازی
+اگر `BLOB_READ_WRITE_TOKEN` وجود داشته باشد، فایل منطقی `growland/db.json` داخل Vercel Blob نگهداری می‌شود و محتوای آن قبل از ذخیره با AES-256-GCM رمزنگاری می‌شود؛ کلید در Environment Variable باقی می‌ماند. اگر توکن وجود نداشته باشد، در توسعه از `data/db.json` استفاده می‌شود.
 
-## Important Vercel note
-This project is intentionally database-free. Vercel serverless functions do **not** provide durable writable local filesystem storage between invocations. Therefore `data.json` is suitable for local/self-hosted Node deployment, but durable writes on Vercel require an external persistent storage service (which would conflict with the strict “no database” requirement).
+> نکته امنیتی: چون مدل ورود طبق درخواست پروژه فقط بر اساس شماره تلفن است و SMS/رمز عبور ندارد، این روش برای محیط واقعی احراز هویت قوی محسوب نمی‌شود. برای MVP پیاده‌سازی شده و بعداً می‌توان OTP یا رمز عبور را بدون تغییر معماری داده اضافه کرد.
 
-The code is structured so the API can later be moved to a persistent Node host without changing the React UI.
-
-## Vercel deployment configuration
-A `vercel.json` is included. The frontend can be built by Vercel and the Express API can run as a Vercel Node function. **However, JSON writes are not durable on Vercel serverless storage.** This is a platform constraint, not a code bug. If the strict no-database rule remains, use a persistent Node host for the API and Vercel for the frontend, setting `VITE_API_URL` to the API URL.
+## مدل داده
+`members`, `reports`, `announcements`, و `site` در یک JSON document قرار دارند. XP و Level به‌صورت مدیریتی قابل ویرایش هستند؛ Level پیش‌فرض از XP با قانون هر 1000 XP محاسبه می‌شود.
