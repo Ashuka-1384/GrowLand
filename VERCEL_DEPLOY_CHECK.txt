@@ -1,24 +1,28 @@
-GrowLand — Vercel Deployment Check — fix-05
+GrowLand — Vercel Deployment Check — fix-06
 
-CRITICAL:
-The failing log was from GitHub commit edd3276. Do NOT redeploy that old commit.
-Push the fixed project and verify Vercel is building the new commit hash.
+This package is the current Vercel-ready source.
 
-Fixed TypeScript error:
-Property 'hiddenFromPublic' does not exist on type 'Member'
-
-Source fixes:
+Critical source fixes:
 - lib/types.ts -> Member.hiddenFromPublic: boolean
 - app/api/members/route.ts -> uses isPublicMember()
 - package.json -> Next.js 14.2.35
+- vercel.json -> explicit npm ci install + npm run build
+- app/page.tsx + components/Nav.tsx -> next/image instead of raw <img>
+- store-dependent server pages -> explicit Node.js runtime
 
-Windows commands:
+Before deployment on Windows:
 npm.cmd install
 npm.cmd run typecheck
+npm.cmd run lint
 npm.cmd run build
 
+Then:
 git add .
-git commit -m "fix: resolve GrowLand Vercel TypeScript build error"
+git commit -m "fix: stabilize GrowLand Vercel build"
 git push origin main
 
-Then check the Vercel deployment commit hash.
+In Vercel, verify the build log shows:
+- the new Git commit hash
+- Next.js 14.2.35
+
+If Vercel prints next@14.2.15, it is not building this project version (or its package/lockfile), because this source and lockfile pin 14.2.35 exactly.

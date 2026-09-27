@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { get, put, BlobPreconditionFailedError } from '@vercel/blob';
-import type { Member, Store } from './types';
+import type { Member, PublicMember, Store } from './types';
 
 const file = path.resolve(process.cwd(), process.env.GROWLAND_DATA_FILE || './data/store.json');
 const blobPath = process.env.GROWLAND_BLOB_PATH?.trim() || 'growland/store.json';
@@ -81,7 +81,7 @@ export function isPublicMember(member: { active?: boolean; hiddenFromPublic?: bo
   return member.active !== false && member.hiddenFromPublic !== true;
 }
 
-export function publicMember(member: Member) {
+export function publicMember(member: Member): PublicMember {
   const {
     id, fullName, age, city, focus, level, goal, time, skills, xp, levelNumber,
     readyForWork, roadmap, growth, createdAt,

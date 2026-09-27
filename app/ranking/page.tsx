@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 export const dynamic = 'force-dynamic';
 
 import {getStore,isPublicMember} from '@/lib/store'; import Link from 'next/link'; import {initials} from '@/lib/utils';
