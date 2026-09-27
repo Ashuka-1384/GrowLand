@@ -47,6 +47,25 @@ app.post('/api/auth/login',async(req,res)=>{const phone=normalizePhone(req.body?
 app.get('/api/auth/me',auth,async(req,res)=>{if(req.auth?.sub==='admin-root'){return res.json({user:{id:'admin-root',name:'GrowLand Admin',phone:ADMIN_PHONE,role:'admin',xp:0,level:1,skills:[],profileComplete:true,ready:true}})}const db=await readDB();const m=db.members.find(x=>x.id===req.auth.sub);if(!m)return res.status(401).json({message:'کاربر یافت نشد.'});res.json({user:safeUser(m)})});
 
 app.get('/api/member/dashboard',auth,async(req,res)=>{if(req.auth?.sub==='admin-root'){return res.json({member:{id:'admin-root',name:'GrowLand Admin',phone:ADMIN_PHONE,role:'admin',xp:0,level:1,skills:[skillTemplate('مدیریت GrowLand',0,1)],ready:true,roadmap:'پنل رشد مدیر اصلی'},reports:[],growth:[...Array(7)].map((_,i)=>({label:`روز ${i+1}`,xp:0}))})}const db=await readDB();const m=db.members.find(x=>x.id===req.auth.sub);if(!m)return res.status(404).json({message:'کاربر یافت نشد.'});const reports=(db.reports||[]).filter(r=>r.memberId===m.id);res.json({member:safeUser(m),reports,growth:m.growth||[]})});
+app.put('/api/member/profile',auth,async(req,res)=>{
+ try{
+  const db=await readDB();
+  const m=db.members.find(x=>x.id===req.auth.sub);
+  if(!m) return res.status(400).json({message:'پروفایل عضو پیدا نشد.'});
+  if(req.body.name!==undefined) m.name=String(req.body.name).trim();
+  if(req.body.phone!==undefined && req.body.phone!==m.phone){
+    const phone=normalizePhone(req.body.phone);
+    if(m.phone===ADMIN_PHONE) return res.status(400).json({message:'شماره مدیر اصلی قابل تغییر نیست.'});
+    if(db.members.some(x=>x.phone===phone)) return res.status(409).json({message:'این شماره قبلاً استفاده شده است.'});
+    m.phone=phone;
+  }
+  ['age','city','goal','about','future','why','hours','focusLevel'].forEach(k=>{if(req.body[k]!==undefined)m[k]=req.body[k]});
+  if(Array.isArray(req.body.skills))m.skills=req.body.skills;
+  await writeDB(db);
+  res.json({user:safeUser(m)});
+ }catch(e){res.status(500).json({message:e.message||'خطا در ذخیره پروفایل'})}
+});
+
 app.patch('/api/member/ready',auth,async(req,res)=>{const db=await readDB();const m=db.members.find(x=>x.id===req.auth.sub);m.ready=Boolean(req.body?.ready);await writeDB(db);res.json({user:safeUser(m)})});
 app.post('/api/member/reports',auth,async(req,res)=>{try{const db=await readDB();const m=db.members.find(x=>x.id===req.auth.sub);if(!m)return res.status(400).json({message:'ارسال گزارش فقط برای اعضای ثبت شده فعال است.'});const body=String(req.body?.body||'').trim();if(!body)return res.status(400).json({message:'متن گزارش خالی است.'});db.reports=db.reports||[];db.reports.unshift({id:randomUUID(),memberId:m.id,memberName:m.name,body,createdAt:new Date().toISOString()});await writeDB(db);res.json({ok:true})}catch(e){console.error('REPORT_ERROR',e);res.status(500).json({message:e.message||'خطا در ارسال گزارش'})}});
 
