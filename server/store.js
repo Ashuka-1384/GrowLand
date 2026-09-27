@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { put, list } from '@vercel/blob';
+import { put, list, get } from '@vercel/blob';
 
 const localFile = path.resolve(process.cwd(), 'data/db.json');
 const blobPath = 'growland/db.json';
@@ -15,7 +15,17 @@ export async function readDB(){
   if(hasBlob()){
     const result = await list({prefix: blobPath, limit: 10});
     const item = result.blobs.find(x=>x.pathname===blobPath) || result.blobs[0];
-    if(item?.url){ const res=await fetch(item.url); if(res.ok){ const raw=await res.text(); return JSON.parse(decrypt(raw)); } }
+    if(item){
+      try {
+        const blob = await get(item.pathname, { access: 'private' });
+        if (blob?.stream) {
+          const raw = await new Response(blob.stream).text();
+          return JSON.parse(decrypt(raw));
+        }
+      } catch (err) {
+        console.error('BLOB_READ_ERROR', err);
+      }
+    }
   }
   return JSON.parse(await fs.readFile(localFile,'utf8'));
 }
@@ -24,7 +34,7 @@ export async function writeDB(db){
   const body = JSON.stringify(db,null,2);
   if(hasBlob()){
     if(!process.env.BLOB_DATA_SECRET && !process.env.JWT_SECRET) throw new Error('BLOB_DATA_SECRET or JWT_SECRET is required for Blob storage');
-    await put(blobPath, encrypt(body), {access:'public', addRandomSuffix:false, contentType:'application/json'});
+    await put(blobPath, encrypt(body), {access:'private', addRandomSuffix:false, contentType:'application/json'});
   } else {
     await fs.writeFile(localFile,body,'utf8');
   }
