@@ -26,7 +26,7 @@ function encrypt(text) {
 }
 function decrypt(payload) {
   const x = JSON.parse(payload);
-  if (x?.v !== 1) throw new Error('Unsupported encrypted storage version.');
+  if (x?.v !== 1 || !x.iv || !x.tag || !x.data) throw new Error('Unsupported encrypted storage version.');
   const decipher = crypto.createDecipheriv('aes-256-gcm', key(), Buffer.from(x.iv, 'base64'));
   decipher.setAuthTag(Buffer.from(x.tag, 'base64'));
   return Buffer.concat([decipher.update(Buffer.from(x.data, 'base64')), decipher.final()]).toString('utf8');
@@ -52,11 +52,28 @@ export async function readDB({ fresh = false } = {}) {
   if (hasBlob()) {
     const result = await list({ prefix: blobPath, limit: 10 });
     const item = result.blobs.find(x => x.pathname === blobPath);
-    if (!item) throw new Error('GrowLand Blob database was not found.');
+    if (!item) throw new Error('GrowLand Blob database was not found. Create or migrate the Blob database first.');
     const blob = await get(item.pathname, { access: 'private' });
     if (!blob?.stream) throw new Error('GrowLand Blob database stream is unavailable.');
     const raw = await new Response(blob.stream).text();
-    db = normalizeDB(JSON.parse(decrypt(raw)));
+
+    // v3 stored plain JSON. Keep it readable so an existing deployment does not
+    // become unavailable just because the new encryption secret has not been set yet.
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.members)) {
+        db = normalizeDB(parsed);
+      } else {
+        throw new Error('not plaintext database');
+      }
+    } catch {
+      if (!secret()) throw new Error('BLOB_DATA_SECRET is required to read the encrypted Blob database.');
+      try {
+        db = normalizeDB(JSON.parse(decrypt(raw)));
+      } catch (error) {
+        throw new Error(`GrowLand Blob database could not be decrypted or parsed: ${error.message}`);
+      }
+    }
   } else {
     db = normalizeDB(JSON.parse(await fs.readFile(localFile, 'utf8')));
   }

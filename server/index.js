@@ -163,22 +163,31 @@ function tokenFor(m) {
     audience: 'growland-web'
   });
 }
+function cookieValue(req, name) {
+  const raw = String(req.headers.cookie || '');
+  const match = raw.match(new RegExp('(?:^|;\\s*)' + name.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&') + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : '';
+}
 function setAuthCookie(res, token) {
-  res.cookie('growland_session', token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: '/'
-  });
+  const parts = [
+    `growland_session=${encodeURIComponent(token)}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    `Max-Age=${7 * 24 * 60 * 60}`
+  ];
+  if (isProduction) parts.push('Secure');
+  res.setHeader('Set-Cookie', parts.join('; '));
 }
 function clearAuthCookie(res) {
-  res.clearCookie('growland_session', { httpOnly: true, secure: isProduction, sameSite: 'lax', path: '/' });
+  const parts = ['growland_session=', 'Path=/', 'HttpOnly', 'SameSite=Lax', 'Max-Age=0'];
+  if (isProduction) parts.push('Secure');
+  res.setHeader('Set-Cookie', parts.join('; '));
 }
 function auth(req, res, next) {
   try {
     const header = req.headers.authorization || '';
-    const raw = header.startsWith('Bearer ') ? header.slice(7).trim() : req.headers.cookie?.match(/(?:^|;\s*)growland_session=([^;]+)/)?.[1];
+    const raw = header.startsWith('Bearer ') ? header.slice(7).trim() : cookieValue(req, 'growland_session');
     if (!raw) throw new Error('missing token');
     const decoded = jwt.verify(raw, JWT_SECRET, { issuer: 'growland', audience: 'growland-web' });
     req.auth = decoded;
