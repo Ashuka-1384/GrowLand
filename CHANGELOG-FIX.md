@@ -37,3 +37,35 @@
 - `node --check server/store.js`: OK
 - Frontend JSX parsing: verified in previous pass.
 - Runtime integration test in this environment could not be executed because `node_modules` is not installed in the provided archive and package installation was unavailable in the execution environment.
+
+
+## 2026-09-28 — hardening and growth-domain revision
+
+### Authentication
+- Removed browser `localStorage` token storage.
+- Added HttpOnly/Secure/SameSite session cookie.
+- Added password hashing with Node `scryptSync`.
+- Added explicit logout endpoint.
+- Admin authentication now requires the configured admin password; production requires a hashed admin password.
+- Kept legacy password migration only for non-production when `ALLOW_LEGACY_LOGIN=true`.
+
+### Data integrity
+- Level is derived from XP; direct admin level mutation is ignored.
+- Added XP transaction ledger and audit log.
+- Member job readiness is now assessment-derived and read-only.
+- Member-submitted skill XP/level cannot be used to self-award progression.
+
+### Growth domain
+- Added Activities, Submissions/Proof, Assessments, Jobs and audit-log collections to the storage model.
+- Added member activity submission endpoint.
+- Added admin activity creation and submission review endpoints.
+- Added assessment endpoint that updates job-readiness state.
+
+### Storage
+- Blob encryption now requires a dedicated `BLOB_DATA_SECRET` in production and no longer falls back to `JWT_SECRET`.
+- Reads from configured Blob storage fail closed instead of silently falling back to local serverless disk.
+- Repository API remains storage-agnostic so a transactional database can replace JSON/Blob later.
+
+### Verification
+- `node --check` passes for `server/index.js`, `server/store.js`, and `api/index.js`.
+- Full `npm install` / Vite build could not be completed in the execution environment because package installation timed out; no claim of a successful production bundle is made without those dependencies.

@@ -14,14 +14,12 @@ function getPublicMembers(){
 }
 
 async function api(path, options={}) {
-  const token = localStorage.getItem('growland_token');
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeout ?? 15000);
   try {
     const { timeout: _timeout, headers: customHeaders, ...requestOptions } = options;
     const headers = {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(customHeaders || {})
     };
     const res = await fetch(`${API}${path}`, {
@@ -33,7 +31,6 @@ async function api(path, options={}) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       if (res.status === 401) {
-        localStorage.removeItem('growland_token');
         window.dispatchEvent(new CustomEvent('growland:auth-expired'));
       }
       throw new Error(data.message || `خطای سرور (${res.status})`);
@@ -50,17 +47,11 @@ async function api(path, options={}) {
 function useAuth() {
   const [auth, setAuth] = useState({loading:true, user:null});
   const refresh = useCallback(async () => {
-    const token = localStorage.getItem('growland_token');
-    if (!token) {
-      setAuth({loading:false,user:null});
-      return null;
-    }
     try {
       const data = await api('/auth/me');
       setAuth({loading:false,user:data.user});
       return data.user;
     } catch {
-      localStorage.removeItem('growland_token');
       setAuth({loading:false,user:null});
       return null;
     }
@@ -120,7 +111,7 @@ function Navbar({user}){
         <a href="/#about">درباره ما</a><a href="https://example.com">آرشیو</a><NavLink to="/members">همه اعضا</NavLink>
         {user ? <NavLink to="/dashboard">پنل رشد</NavLink> : <NavLink to="/signin">ورود</NavLink>}
         {!user && <NavLink className="nav-cta" to="/signup">عضویت</NavLink>}
-        {user?.role==='admin' && <NavLink to="/admin">پنل ادمین</NavLink>}{user && <button className="nav-logout" onClick={()=>{localStorage.removeItem('growland_token');window.location.href='/signin'}}>خروج</button>}
+        {user?.role==='admin' && <NavLink to="/admin">پنل ادمین</NavLink>}{user && <button className="nav-logout" onClick={async()=>{try{await api('/auth/logout',{method:'POST'})}finally{window.location.href='/signin'}}}>خروج</button>}
       </nav>
     </div>
   </header>
@@ -180,10 +171,10 @@ function ProfileRow({member,index}){return <div className="rank-row"><span class
 function initials(name='G'){return name.split(' ').map(x=>x[0]).slice(0,2).join('')}
 
 function Signup({onAuth}){
- const [form,setForm]=useState({name:'',age:'',phone:'',city:'',focus:'',level:'تازه شروع کردم',goal:'',hours:'۳ تا ۵ ساعت',future:'',why:'',about:''}); const [msg,setMsg]=useState(''); const [submitting,setSubmitting]=useState(false); const nav=useNavigate();
- const submit=async e=>{e.preventDefault();if(submitting)return;setSubmitting(true);setMsg('');try{const result=await api('/auth/register',{method:'POST',body:JSON.stringify(form)});localStorage.setItem('growland_token',result.token);await onAuth();nav('/dashboard')}catch(err){setMsg(err.message)}finally{setSubmitting(false)}};
+ const [form,setForm]=useState({name:'',age:'',phone:'',password:'',city:'',focus:'',level:'تازه شروع کردم',goal:'',hours:'۳ تا ۵ ساعت',future:'',why:'',about:''}); const [msg,setMsg]=useState(''); const [submitting,setSubmitting]=useState(false); const nav=useNavigate();
+ const submit=async e=>{e.preventDefault();if(submitting)return;setSubmitting(true);setMsg('');try{await api('/auth/register',{method:'POST',body:JSON.stringify(form)});await onAuth();nav('/dashboard')}catch(err){setMsg(err.message)}finally{setSubmitting(false)}};
  return <div className="auth-page container"><div className="form-shell"><div className="form-intro"><span className="eyebrow">🌱 فرم ثبت‌نام GrowLand</span><h1>شروع مسیر رشد</h1><p>قرار نیست فقط عضو یک کامیونیتی باشی؛ قرار است مسیر رشدت را بسازی، ببینی و به توانمندی تبدیل کنی.</p><div className="quote">«یاد بگیر → انجام بده → خروجی بساز → بازخورد بگیر → رشدت را ثابت کن»</div></div><form onSubmit={submit} className="form-grid">
- {[["name","نام و نام خانوادگی","text"],["age","سن","number"],["phone","شماره تماس","tel"],["city","شهر و محل زندگی","text"]].map(([k,l,t])=><Field key={k} label={l}><input required type={t} value={form[k]} onChange={e=>setForm({...form,[k]:e.target.value})} placeholder={k==='phone'?'+98 9xx xxx xxxx':''}/></Field>)}
+ {[["name","نام و نام خانوادگی","text"],["age","سن","number"],["phone","شماره تماس","tel"],["city","شهر و محل زندگی","text"]].map(([k,l,t])=><Field key={k} label={l}><input required type={t} value={form[k]} onChange={e=>setForm({...form,[k]:e.target.value})} placeholder={k==='phone'?'+98 9xx xxx xxxx':''}/></Field>)}<Field label="رمز عبور"><input required minLength="8" type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} placeholder="حداقل ۸ کاراکتر"/></Field>
  <Field label="در حال حاضر بیشتر روی کدام حوزه تمرکز داری؟"><select required value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}><option value="">انتخاب حوزه</option>{DEFAULT_SKILLS.map(x=><option key={x}>{x}</option>)}<option>سایر</option></select></Field>
  <Field label="در این حوزه چه سطحی داری?"><select value={form.level} onChange={e=>setForm({...form,level:e.target.value})}>{['تازه شروع کردم','مقدماتی','متوسط','خوب','حرفه‌ای'].map(x=><option key={x}>{x}</option>)}</select></Field>
  <Field label="مهم‌ترین هدفت از ورود به GrowLand چیست؟"><select required value={form.goal} onChange={e=>setForm({...form,goal:e.target.value})}><option value="">انتخاب هدف</option>{['توسعه یک مهارت','ساختن رزومه و نمونه‌کار','افزایش اعتمادبه‌نفس و مهارت‌های فردی','آماده شدن برای ورود به بازار کار','پیدا کردن مسیر شغلی','رسیدن به درآمد','سایر'].map(x=><option key={x}>{x}</option>)}</select></Field>
@@ -194,7 +185,11 @@ function Signup({onAuth}){
 }
 function Field({label,children,wide}){return <label className={wide?'field wide':'field'}><span>{label}</span>{children}</label>}
 
-function Signin({onAuth}){const [phone,setPhone]=useState('');const [msg,setMsg]=useState('');const [submitting,setSubmitting]=useState(false);const nav=useNavigate();const submit=async e=>{e.preventDefault();if(submitting)return;setSubmitting(true);setMsg('');try{const result=await api('/auth/login',{method:'POST',body:JSON.stringify({phone})});localStorage.setItem('growland_token',result.token);await onAuth();nav('/dashboard')}catch(err){setMsg(err.message)}finally{setSubmitting(false)}};return <div className="auth-page container"><div className="login-card"><img src="/growland-logo.jpg"/><span className="eyebrow">ورود بدون SMS</span><h1>به مسیرت برگرد</h1><p>شماره‌ای که هنگام ثبت‌نام وارد کردی را با پیش‌شماره +98 وارد کن.</p><form onSubmit={submit}><Field label="شماره تماس"><input required type="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+989123456789"/></Field>{msg&&<div className="error">{msg}</div>}<button className="btn primary full" disabled={submitting}>{submitting?'در حال ورود…':'ورود به پنل'}</button></form><Link to="/signup" className="back-link">هنوز عضو نیستی؟ ثبت‌نام کن</Link></div></div>}
+function Signin({onAuth}){
+ const [phone,setPhone]=useState(''); const [password,setPassword]=useState(''); const [msg,setMsg]=useState(''); const [submitting,setSubmitting]=useState(false); const nav=useNavigate();
+ const submit=async e=>{e.preventDefault();if(submitting)return;setSubmitting(true);setMsg('');try{await api('/auth/login',{method:'POST',body:JSON.stringify({phone,password})});await onAuth();nav('/dashboard')}catch(err){setMsg(err.message)}finally{setSubmitting(false)}};
+ return <div className="auth-page container"><div className="login-card"><img src="/growland-logo.jpg"/><span className="eyebrow">ورود امن</span><h1>به مسیرت برگرد</h1><p>شماره موبایل و رمز عبوری که هنگام ثبت‌نام تعیین کردی را وارد کن.</p><form onSubmit={submit}><Field label="شماره تماس"><input required type="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+989123456789"/></Field><Field label="رمز عبور"><input required minLength="8" type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="حداقل ۸ کاراکتر"/></Field>{msg&&<div className="error">{msg}</div>}<button className="btn primary full" disabled={submitting}>{submitting?'در حال ورود…':'ورود به پنل'}</button></form><Link to="/signup" className="back-link">هنوز عضو نیستی؟ ثبت‌نام کن</Link></div></div>
+}
 
 function Members(){const [members,setMembers]=useState([]);useEffect(()=>{let active=true;getPublicMembers().then(d=>{if(active)setMembers(d.members||[])}).catch(()=>{});return()=>{active=false};},[]);return <div className="page container"><SectionTitle kicker="Community" title="همه اعضای GrowLand" text="کارت پروفایل اعضا بر اساس اطلاعات تکمیل‌شده و وضعیت رشد نمایش داده می‌شود."/><div className="member-grid">{members.map(m=><MemberCard key={m.id} member={m}/>)}</div>{!members.length&&<div className="empty large">هنوز پروفایل عمومی‌ای برای نمایش وجود ندارد.</div>}</div>}
 function MemberCard({member}){return <article className="member-card"><div className="member-head"><div className="avatar big">{initials(member.name)}</div><div><h3>{member.name}</h3><span>{member.primarySkill||'مسیر در حال تنظیم'}</span></div><b className="level-badge">Lv.{member.level||1}</b></div><div className="xpbar"><span style={{width:`${Math.min(100,(member.xp%1000)/10)}%`}}></span></div><div className="member-meta"><span>{member.xp||0} XP</span><span>{member.skills?.length||0} مهارت</span><span>{member.ready?'آماده کار':'در مسیر رشد'}</span></div><div className="tags">{(member.skills||[]).slice(0,4).map(s=><span key={s.name}>{s.name}</span>)}</div></article>}
@@ -206,7 +201,6 @@ function Dashboard({user}){
   const [profile,setProfile]=useState({name:'',phone:'',age:'',city:'',goal:'',about:''});
   const [saving,setSaving]=useState(false);
   const [reportSaving,setReportSaving]=useState(false);
-  const [readySaving,setReadySaving]=useState(false);
   const load=useCallback(async()=>{
     const d=await api('/member/dashboard');
     setData(d);
@@ -226,13 +220,6 @@ function Dashboard({user}){
     try{await api('/member/profile',{method:'PUT',body:JSON.stringify(profile)});setMsg('پروفایل ذخیره شد.');await load();}
     catch(e){setMsg(e.message)}
     finally{setSaving(false)}
-  };
-  const toggleReady=async()=>{
-    if(readySaving)return;
-    setReadySaving(true);setMsg('');
-    try{await api('/member/ready',{method:'PATCH',body:JSON.stringify({ready:!Boolean(member.ready)})});await load();}
-    catch(e){setMsg(e.message)}
-    finally{setReadySaving(false)}
   };
   const sendReport=async()=>{
     const body=report.trim();
@@ -259,7 +246,7 @@ function Dashboard({user}){
     </div>
     <div className="dashboard-head">
       <div><span className="eyebrow">Growth Dashboard</span><h1>سلام {(user?.name||'کاربر').split(' ')[0]} 👋</h1><p>اینجا می‌توانی رشد، XP، مهارت‌ها و مسیر پیشنهادی خودت را ببینی.</p></div>
-      <button type="button" className={member.ready?'ready-toggle active':'ready-toggle'} disabled={readySaving||isAdmin} onClick={toggleReady}><span></span>{member.ready?'آماده کار':'هنوز در مسیر رشد'}</button>
+      <div className={member.ready?'ready-toggle active':'ready-toggle'} title="این وضعیت فقط از طریق ارزیابی شغلی تغییر می‌کند."><span></span>{member.jobReadiness?.status==='job_ready'?'آماده کار':member.jobReadiness?.status==='developing'?'در حال توسعه':'در مسیر رشد'}</div>
     </div>
     <div className="dashboard-grid">
       <StatCard title="Level" value={member.level||1} sub={`${member.xp||0} XP`}/><StatCard title="XP" value={member.xp||0} sub="امتیاز رشد"/><StatCard title="مهارت‌ها" value={skills.length} sub="حوزه فعال"/><StatCard title="گزارش‌ها" value={Array.isArray(data.reports)?data.reports.length:0} sub="ارسال‌شده"/>

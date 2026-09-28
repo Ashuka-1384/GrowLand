@@ -46,3 +46,24 @@ API: `http://localhost:3001`
 
 ## Vercel Root Directory
 If deploying this repository, set Root Directory to the folder containing package.json and vercel.json. If the project is uploaded as the repository root, leave Root Directory empty.
+
+
+## Security / architecture changes
+
+- Authentication now uses a hashed password for members and an HttpOnly session cookie; JWTs are no longer stored in browser localStorage.
+- Production requires `JWT_SECRET`, `ADMIN_PHONE`, and `ADMIN_PASSWORD`.
+- `ADMIN_PASSWORD` can be a scrypt hash (`salt.base64.hash.base64`) in production.
+- `ALLOW_LEGACY_LOGIN=true` is intended only for controlled local migration of old members that have no password; it should remain false in production.
+- Member `level` is derived from XP and cannot be directly assigned.
+- XP changes are recorded as an auditable ledger (`xpTransactions`).
+- Activities, submissions/proofs, assessments, job-readiness state, and audit logs are part of the JSON domain model.
+- Member job-readiness is assessment-derived and cannot be changed from the member UI.
+- Blob storage uses a dedicated `BLOB_DATA_SECRET`; it is never derived from `JWT_SECRET`.
+- JSON/Blob remains an MVP storage implementation. For multi-instance production scale, move the repository layer to a transactional database or distributed transactional store.
+
+### Generate production admin password hash
+
+```bash
+node scripts/hash-password.mjs "your-strong-password"
+```
+Use the printed value as `ADMIN_PASSWORD` in production.
