@@ -271,15 +271,25 @@ app.get('/api/health', async (req, res) => {
 });
 
 app.get('/api/public/announcements', async (req, res) => {
-  const db = await loadDB();
-  res.json({ announcements: db.announcements || [] });
+  try {
+    const db = await loadDB();
+    res.json({ announcements: db.announcements || [] });
+  } catch (err) {
+    console.error('PUBLIC_ANNOUNCEMENTS_ERROR', err);
+    res.status(500).json({ message: 'خطا در خواندن اطلاعات اطلاعیه‌ها.', code: 'STORAGE_READ_FAILED' });
+  }
 });
 app.get('/api/public/members', async (req, res) => {
-  const db = await loadDB();
-  const members = db.members
-    .filter(m => m.profileComplete !== false)
-    .sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
-  res.json({ members: members.map(publicUser) });
+  try {
+    const db = await loadDB();
+    const members = db.members
+      .filter(m => m.profileComplete !== false)
+      .sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
+    res.json({ members: members.map(publicUser) });
+  } catch (err) {
+    console.error('PUBLIC_MEMBERS_ERROR', err);
+    res.status(500).json({ message: 'خطا در خواندن اطلاعات اعضا.', code: 'STORAGE_READ_FAILED' });
+  }
 });
 
 app.post('/api/auth/register', rateLimit({ windowMs: 60_000, max: 10 }), async (req, res) => {
@@ -491,11 +501,16 @@ app.patch('/api/member/ready', auth, (req, res) => {
 });
 
 app.get('/api/admin/overview', auth, admin, async (req, res) => {
-  const db = await loadDB();
-  const members = [...db.members].sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
-  const reports = [...db.reports].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-  const pendingSubmissions = db.submissions.filter(s => s.status === 'pending');
-  res.json({ members: members.map(safeUser), reports, pendingSubmissions, activities: db.activities, assessments: db.assessments, auditLog: db.auditLog.slice(0, 100) });
+  try {
+    const db = await loadDB();
+    const members = [...db.members].sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
+    const reports = [...db.reports].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    const pendingSubmissions = db.submissions.filter(s => s.status === 'pending');
+    res.json({ members: members.map(safeUser), reports, pendingSubmissions, activities: db.activities, assessments: db.assessments, auditLog: db.auditLog.slice(0, 100) });
+  } catch (err) {
+    console.error('ADMIN_OVERVIEW_ERROR', err);
+    res.status(500).json({ message: 'خطا در خواندن اطلاعات پنل ادمین.', code: 'STORAGE_READ_FAILED' });
+  }
 });
 
 app.post('/api/admin/activities', auth, admin, async (req, res) => {
@@ -650,4 +665,10 @@ app.use((err, req, res, next) => {
 });
 
 if (!isProduction) app.listen(PORT, () => console.log(`GrowLand API running on http://localhost:${PORT}`));
+app.use((err, req, res, next) => {
+  console.error('UNHANDLED_API_ERROR', err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ message: 'خطای داخلی سرور.', code: 'INTERNAL_SERVER_ERROR' });
+});
+
 export default app;

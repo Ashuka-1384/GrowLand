@@ -53,7 +53,7 @@ export async function readDB({ fresh = false } = {}) {
     const result = await list({ prefix: blobPath, limit: 10 });
     const item = result.blobs.find(x => x.pathname === blobPath);
     if (!item) throw new Error('GrowLand Blob database was not found. Create or migrate the Blob database first.');
-    const blob = await get(item.pathname, { access: 'private' });
+    const blob = await get(item.pathname, { access: 'private', useCache: false });
     if (!blob?.stream) throw new Error('GrowLand Blob database stream is unavailable.');
     const raw = await new Response(blob.stream).text();
 
