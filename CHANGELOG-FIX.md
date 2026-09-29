@@ -47,7 +47,6 @@
 - Added password hashing with Node `scryptSync`.
 - Added explicit logout endpoint.
 - Admin authentication now requires the configured admin password; production requires a hashed admin password.
-- Kept legacy password migration only for non-production when `ALLOW_LEGACY_LOGIN=true`.
 
 ### Data integrity
 - Level is derived from XP; direct admin level mutation is ignored.
@@ -69,3 +68,41 @@
 ### Verification
 - `node --check` passes for `server/index.js`, `server/store.js`, and `api/index.js`.
 - Full `npm install` / Vite build could not be completed in the execution environment because package installation timed out; no claim of a successful production bundle is made without those dependencies.
+
+## 2026-09-28 — Fresh Deployment / Architecture Hardening Pass
+
+### Storage reliability
+- Blob pathname نسخه‌دار شد و از `BLOB_DB_PATH` پشتیبانی می‌کند؛ default جدید `growland/v7/db.json.enc` است تا با payloadهای نسخه‌های قبلی تداخل نکند.
+- اولین read روی pathname جدید، در صورت نبودن Blob، از `data/db.json` bootstrap می‌کند و نسخه رمزگذاری‌شده را می‌نویسد.
+- plaintext fallback حذف شد؛ Blob production فقط payload رمزگذاری‌شده با AES-256-GCM را می‌پذیرد.
+- خطای authentication/decryption کلید Blob به‌صورت شفاف به `STORAGE_UNAVAILABLE`/503 تبدیل می‌شود و دیگر به‌عنوان 500 مبهم گزارش نمی‌شود.
+- `BLOB_DATA_SECRET` در صورت فعال بودن Blob حداقل 32 کاراکتر لازم دارد.
+- `JWT_SECRET` در production حداقل 32 کاراکتر لازم دارد.
+- Production دیگر اجازه استفاده از local filesystem به‌عنوان storage را نمی‌دهد.
+- `Cache-Control: no-store` برای API فعال شد.
+
+### Authentication
+- Production admin password باید ساختار scrypt hash معتبر داشته باشد.
+- مسیر legacy password migration حذف شد تا Deploy جدید فقط با passwordهای صریح و hashشده کار کند.
+- شماره مدیر اصلی از ثبت‌نام memberها مستثنی شد.
+- endpoint تغییر password برای memberها اضافه شد.
+- session پس از تغییر password پاک می‌شود تا ورود مجدد اجباری باشد.
+
+### Growth integrity
+- تأیید Activity علاوه بر XP کلی، XP مهارت مرتبط را نیز ثبت می‌کند.
+- skill level از skill XP محاسبه می‌شود و سقف 5 دارد.
+- Admin UI مدیریت Activity و بررسی Proof/Submission را دریافت کرد.
+- Admin UI ثبت Job Assessment را دریافت کرد.
+- کنترل مستقیم Level در UI حذف شد؛ Level همچنان derived از XP است.
+
+### UX / failure handling
+- Dashboard member در خطای API دیگر روی loading بی‌نهایت نمی‌ماند و دکمه retry دارد.
+- Admin panel نیز loading/error/retry را به‌صورت مشخص مدیریت می‌کند.
+- خطاهای public members/announcements دیگر silently به empty state تبدیل نمی‌شوند.
+- لینک placeholder خارجی `example.com` حذف شد.
+
+### Dependency hygiene
+- نسخه dependencyهای package.json از range به exact version pin شد تا installهای آینده dependency ناخواسته جدید نکشند.
+
+### Deployment limitation
+- اجرای کامل `npm install` در محیط بررسی به علت timeout رجیستری npm موفق نشد؛ در نتیجه Vite production build به‌صورت واقعی در این محیط verify نشده است.

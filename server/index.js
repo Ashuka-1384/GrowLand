@@ -10,19 +10,33 @@ const app = express();
 const PORT = Number(process.env.PORT || 3001);
 const isProduction = process.env.NODE_ENV === 'production';
 
-const JWT_SECRET = process.env.JWT_SECRET || (isProduction ? '' : 'local-development-secret-change-me');
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const ADMIN_PHONE = normalizePhone(process.env.ADMIN_PHONE || '');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-const LEGACY_LOGIN = String(process.env.ALLOW_LEGACY_LOGIN || (!isProduction)).toLowerCase() === 'true';
 
-if (isProduction && !process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET must be configured in production.');
+if (isProduction && String(process.env.JWT_SECRET || '').length < 32) {
+  throw new Error('JWT_SECRET must be configured with at least 32 characters in production.');
 }
 if (isProduction && !process.env.BLOB_READ_WRITE_TOKEN) {
-  console.warn('WARNING: BLOB_READ_WRITE_TOKEN is not configured; local filesystem storage is ephemeral on serverless deployments.');
+  throw new Error('BLOB_READ_WRITE_TOKEN must be configured in production. GrowLand does not use ephemeral serverless disk as its production database.');
+}
+if (process.env.BLOB_READ_WRITE_TOKEN && String(process.env.BLOB_DATA_SECRET || '').length < 32) {
+  throw new Error('BLOB_DATA_SECRET must be configured with at least 32 characters when Blob storage is enabled.');
 }
 if (isProduction && (!ADMIN_PHONE || !ADMIN_PASSWORD)) {
   throw new Error('ADMIN_PHONE and ADMIN_PASSWORD must be configured in production.');
+}
+function isScryptHash(value) {
+  const parts = String(value || '').split('.');
+  if (parts.length !== 2) return false;
+  try {
+    const salt = Buffer.from(parts[0], 'base64');
+    const hash = Buffer.from(parts[1], 'base64');
+    return salt.length >= 16 && hash.length === 64;
+  } catch { return false; }
+}
+if (isProduction && !isScryptHash(ADMIN_PASSWORD)) {
+  throw new Error('ADMIN_PASSWORD must be a scrypt hash in production. Generate it with scripts/hash-password.mjs.');
 }
 
 function normalizeOrigin(value = '') {
@@ -80,6 +94,11 @@ app.use((req, res, next) => {
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '1mb', strict: true }));
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+  res.setHeader('Vary', 'Origin, Cookie');
+  next();
+});
 app.use('/api', rateLimit({ windowMs: 60_000, max: 240 }));
 setInterval(() => {
   const now = Date.now();
@@ -118,7 +137,7 @@ function verifyAdminPassword(password) {
   if (!validatePassword(password) || !ADMIN_PASSWORD) return false;
   // Production must use a scrypt hash; plaintext is only accepted for local development.
   if (isProduction) return verifyPassword(password, ADMIN_PASSWORD);
-  return ADMIN_PASSWORD.includes('.') ? verifyPassword(password, ADMIN_PASSWORD) : password === ADMIN_PASSWORD;
+  return isScryptHash(ADMIN_PASSWORD) ? verifyPassword(password, ADMIN_PASSWORD) : password === ADMIN_PASSWORD;
 }
 function validatePassword(password) {
   return typeof password === 'string' && password.length >= 8 && password.length <= 128;
@@ -231,6 +250,19 @@ function addXP(member, amount, reason, metadata = {}) {
   });
   member.xpTransactions = member.xpTransactions.slice(0, 500);
 }
+function addSkillXP(member, skillName, amount) {
+  const delta = Math.max(0, Math.floor(Number(amount) || 0));
+  if (!delta || !skillName) return;
+  member.skills = Array.isArray(member.skills) ? member.skills : [];
+  let skill = member.skills.find(s => String(s.name).trim() === String(skillName).trim());
+  if (!skill) {
+    skill = skillTemplate(skillName);
+    member.skills.push(skill);
+  }
+  skill.xp = Math.max(0, Number(skill.xp) || 0) + delta;
+  skill.level = Math.min(5, Math.floor(skill.xp / 250) + 1);
+}
+
 function ensureDomain(db) {
   db.members = Array.isArray(db.members) ? db.members : [];
   db.reports = Array.isArray(db.reports) ? db.reports : [];
@@ -256,6 +288,13 @@ async function loadDB() {
 async function saveDB(db) {
   return writeDB(ensureDomain(db));
 }
+function storageFailure(res, err, message) {
+  console.error('STORAGE_FAILURE', err);
+  return res.status(503).json({
+    message,
+    code: 'STORAGE_UNAVAILABLE'
+  });
+}
 function audit(db, actorId, action, targetId, metadata = {}) {
   db.auditLog.unshift({ id: randomUUID(), actorId, action, targetId, metadata, createdAt: new Date().toISOString() });
   db.auditLog = db.auditLog.slice(0, 2000);
@@ -264,9 +303,15 @@ function audit(db, actorId, action, targetId, metadata = {}) {
 app.get('/api/health', async (req, res) => {
   try {
     const db = await loadDB();
-    res.json({ ok: true, storage: process.env.BLOB_READ_WRITE_TOKEN ? 'blob' : 'local', members: db.members.length });
-  } catch {
-    res.status(503).json({ ok: false });
+    res.json({
+      ok: true,
+      storage: process.env.BLOB_READ_WRITE_TOKEN ? 'blob' : 'local',
+      blobPath: process.env.BLOB_READ_WRITE_TOKEN ? (process.env.BLOB_DB_PATH || 'growland/v7/db.json.enc') : null,
+      members: db.members.length
+    });
+  } catch (err) {
+    console.error('HEALTH_STORAGE_ERROR', err);
+    res.status(503).json({ ok: false, storage: 'unavailable', code: 'STORAGE_UNAVAILABLE' });
   }
 });
 
@@ -275,8 +320,7 @@ app.get('/api/public/announcements', async (req, res) => {
     const db = await loadDB();
     res.json({ announcements: db.announcements || [] });
   } catch (err) {
-    console.error('PUBLIC_ANNOUNCEMENTS_ERROR', err);
-    res.status(500).json({ message: 'خطا در خواندن اطلاعات اطلاعیه‌ها.', code: 'STORAGE_READ_FAILED' });
+    return storageFailure(res, err, 'ذخیره‌سازی GrowLand در دسترس نیست. تنظیمات Blob را بررسی کنید.');
   }
 });
 app.get('/api/public/members', async (req, res) => {
@@ -287,8 +331,7 @@ app.get('/api/public/members', async (req, res) => {
       .sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
     res.json({ members: members.map(publicUser) });
   } catch (err) {
-    console.error('PUBLIC_MEMBERS_ERROR', err);
-    res.status(500).json({ message: 'خطا در خواندن اطلاعات اعضا.', code: 'STORAGE_READ_FAILED' });
+    return storageFailure(res, err, 'ذخیره‌سازی GrowLand در دسترس نیست. تنظیمات Blob را بررسی کنید.');
   }
 });
 
@@ -304,6 +347,8 @@ app.post('/api/auth/register', rateLimit({ windowMs: 60_000, max: 10 }), async (
     if (!body.focus || !body.goal) return res.status(400).json({ message: 'نام، حوزه و هدف الزامی است.' });
     const age = body.age === '' || body.age == null ? null : Number(body.age);
     if (age !== null && (!Number.isInteger(age) || age < 5 || age > 120)) return res.status(400).json({ message: 'سن واردشده معتبر نیست.' });
+
+    if (ADMIN_PHONE && phone === ADMIN_PHONE) return res.status(409).json({ message: 'این شماره برای مدیر اصلی رزرو شده است.' });
 
     const db = await loadDB();
     if (db.members.some(m => m.phone === phone)) return res.status(409).json({ message: 'این شماره قبلاً ثبت‌نام کرده است. وارد شوید.' });
@@ -334,13 +379,13 @@ app.post('/api/auth/register', rateLimit({ windowMs: 60_000, max: 10 }), async (
     setAuthCookie(res, token);
     res.status(201).json({ user: safeUser(member) });
   } catch (err) {
-    console.error('REGISTER_ERROR', err);
-    res.status(500).json({ message: 'خطای داخلی سرور در ثبت‌نام.' });
+    return storageFailure(res, err, 'ثبت‌نام انجام نشد؛ ذخیره‌سازی GrowLand در دسترس نیست.');
   }
 });
 
 app.post('/api/auth/login', rateLimit({ windowMs: 60_000, max: 10 }), async (req, res) => {
-  const phone = normalizePhone(req.body?.phone);
+  try {
+    const phone = normalizePhone(req.body?.phone);
   const password = String(req.body?.password || '');
   if (!isValidPhone(phone)) return res.status(400).json({ message: 'شماره موبایل معتبر نیست.' });
 
@@ -357,18 +402,36 @@ app.post('/api/auth/login', rateLimit({ windowMs: 60_000, max: 10 }), async (req
   const member = db.members.find(m => m.phone === phone);
   if (!member) return res.status(401).json({ message: 'شماره موبایل یا رمز عبور نادرست است.' });
 
-  const valid = member.passwordHash
-    ? verifyPassword(password, member.passwordHash)
-    : LEGACY_LOGIN && !isProduction && password === 'growland-dev';
+  const valid = Boolean(member.passwordHash) && verifyPassword(password, member.passwordHash);
   if (!valid) return res.status(401).json({ message: 'شماره موبایل یا رمز عبور نادرست است.' });
 
-  if (!member.passwordHash && LEGACY_LOGIN) {
-    member.passwordHash = passwordHash(password);
-    audit(db, member.id, 'auth.legacy-password-migrated', member.id);
-    await saveDB(db);
-  }
   setAuthCookie(res, tokenFor(member));
-  res.json({ user: safeUser(member) });
+    res.json({ user: safeUser(member) });
+  } catch (err) {
+    return storageFailure(res, err, 'ورود انجام نشد؛ ذخیره‌سازی GrowLand در دسترس نیست.');
+  }
+});
+
+app.post('/api/auth/password', auth, async (req, res) => {
+  try {
+    if (req.auth?.sub === 'admin-root') return res.status(403).json({ message: 'رمز مدیر اصلی از Environment Variables مدیریت می‌شود.' });
+    const currentPassword = String(req.body?.currentPassword || '');
+    const newPassword = String(req.body?.newPassword || '');
+    if (!validatePassword(newPassword)) return res.status(400).json({ message: 'رمز جدید باید بین ۸ تا ۱۲۸ کاراکتر باشد.' });
+    const db = await loadDB();
+    const member = memberFromDB(db, req.auth.sub);
+    if (!member) return res.status(404).json({ message: 'کاربر یافت نشد.' });
+    if (!member.passwordHash || !verifyPassword(currentPassword, member.passwordHash)) {
+      return res.status(401).json({ message: 'رمز فعلی نادرست است.' });
+    }
+    member.passwordHash = passwordHash(newPassword);
+    audit(db, member.id, 'auth.password-changed', member.id);
+    await saveDB(db);
+    clearAuthCookie(res);
+    res.json({ ok: true, message: 'رمز عبور تغییر کرد. دوباره وارد شوید.' });
+  } catch (err) {
+    return storageFailure(res, err, 'تغییر رمز انجام نشد؛ ذخیره‌سازی GrowLand در دسترس نیست.');
+  }
 });
 
 app.post('/api/auth/logout', (req, res) => {
@@ -377,13 +440,17 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 app.get('/api/auth/me', auth, async (req, res) => {
-  if (req.auth?.sub === 'admin-root') {
-    return res.json({ user: { id: 'admin-root', name: 'GrowLand Admin', phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true } });
+  try {
+    if (req.auth?.sub === 'admin-root') {
+      return res.json({ user: { id: 'admin-root', name: 'GrowLand Admin', phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true } });
+    }
+    const db = await loadDB();
+    const m = memberFromDB(db, req.auth.sub);
+    if (!m) return res.status(401).json({ message: 'کاربر یافت نشد.' });
+    res.json({ user: safeUser(m) });
+  } catch (err) {
+    return storageFailure(res, err, 'ذخیره‌سازی GrowLand در دسترس نیست.');
   }
-  const db = await loadDB();
-  const m = memberFromDB(db, req.auth.sub);
-  if (!m) return res.status(401).json({ message: 'کاربر یافت نشد.' });
-  res.json({ user: safeUser(m) });
 });
 
 app.get('/api/member/dashboard', auth, async (req, res) => {
@@ -393,13 +460,17 @@ app.get('/api/member/dashboard', auth, async (req, res) => {
       reports: [], growth: [...Array(7)].map((_, i) => ({ label: `روز ${i + 1}`, xp: 0 })), activities: [], submissions: []
     });
   }
-  const db = await loadDB();
-  const m = memberFromDB(db, req.auth.sub);
-  if (!m) return res.status(404).json({ message: 'کاربر یافت نشد.' });
-  const reports = db.reports.filter(r => r.memberId === m.id);
-  const submissions = db.submissions.filter(s => s.memberId === m.id);
-  const activities = db.activities.filter(a => a.active !== false);
-  res.json({ member: safeUser(m), reports, growth: m.growth || [], activities, submissions });
+  try {
+    const db = await loadDB();
+    const m = memberFromDB(db, req.auth.sub);
+    if (!m) return res.status(404).json({ message: 'کاربر یافت نشد.' });
+    const reports = db.reports.filter(r => r.memberId === m.id);
+    const submissions = db.submissions.filter(s => s.memberId === m.id);
+    const activities = db.activities.filter(a => a.active !== false);
+    res.json({ member: safeUser(m), reports, growth: m.growth || [], activities, submissions });
+  } catch (err) {
+    return storageFailure(res, err, 'ذخیره‌سازی GrowLand در دسترس نیست.');
+  }
 });
 
 app.put('/api/member/profile', auth, async (req, res) => {
@@ -514,17 +585,22 @@ app.get('/api/admin/overview', auth, admin, async (req, res) => {
 });
 
 app.post('/api/admin/activities', auth, admin, async (req, res) => {
-  const title = String(req.body?.title || '').trim();
+  try {
+    const title = String(req.body?.title || '').trim();
   const skill = String(req.body?.skill || '').trim();
   const difficulty = String(req.body?.difficulty || 'simple').trim();
-  const xp = Math.max(0, Math.min(1000, Math.floor(Number(req.body?.xp) || 100)));
-  if (title.length < 3 || skill.length < 2) return res.status(400).json({ message: 'عنوان و مهارت فعالیت الزامی است.' });
+  const xp = Math.max(1, Math.min(1000, Math.floor(Number(req.body?.xp) || 100)));
+  if (title.length < 3 || title.length > 160 || skill.length < 2 || skill.length > 100) return res.status(400).json({ message: 'عنوان و مهارت فعالیت معتبر نیستند.' });
+  if (!['simple', 'medium', 'hard'].includes(difficulty)) return res.status(400).json({ message: 'سطح دشواری نامعتبر است.' });
   const db = await loadDB();
   const activity = { id: randomUUID(), title, skill, difficulty, xp, description: String(req.body?.description || '').trim().slice(0, 3000), active: true, createdAt: new Date().toISOString(), createdBy: req.auth.sub };
   db.activities.unshift(activity);
   audit(db, req.auth.sub, 'activity.created', activity.id);
   await saveDB(db);
-  res.status(201).json({ activity });
+    res.status(201).json({ activity });
+  } catch (err) {
+    return storageFailure(res, err, 'ذخیره فعالیت انجام نشد.');
+  }
 });
 
 app.patch('/api/admin/submissions/:id', auth, admin, async (req, res) => {
@@ -544,6 +620,7 @@ app.patch('/api/admin/submissions/:id', auth, admin, async (req, res) => {
   if (decision === 'approved') {
     submission.xpAwarded = activity.xp;
     addXP(member, activity.xp, 'activity.approved', { activityId: activity.id, submissionId: submission.id });
+    addSkillXP(member, activity.skill, activity.xp);
     member.growth = Array.isArray(member.growth) ? member.growth : [];
     member.growth.push({ label: new Date().toLocaleDateString('fa-IR'), xp: member.xp });
     member.growth = member.growth.slice(-7);
@@ -659,16 +736,14 @@ app.use((err, req, res, next) => {
   console.error('API_ERROR', err);
   if (res.headersSent) return next(err);
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ message: 'بدنه درخواست JSON معتبر نیست.' });
+    return res.status(400).json({ message: 'بدنه درخواست JSON معتبر نیست.', code: 'INVALID_JSON' });
   }
-  res.status(500).json({ message: 'خطای داخلی سرور.' });
-});
-
-if (!isProduction) app.listen(PORT, () => console.log(`GrowLand API running on http://localhost:${PORT}`));
-app.use((err, req, res, next) => {
-  console.error('UNHANDLED_API_ERROR', err);
-  if (res.headersSent) return next(err);
+  const message = String(err?.message || '');
+  if (message.startsWith('GrowLand Blob') || message.startsWith('Local seed database')) {
+    return res.status(503).json({ message: 'ذخیره‌سازی GrowLand در دسترس نیست. تنظیمات Blob را بررسی کنید.', code: 'STORAGE_UNAVAILABLE' });
+  }
   res.status(500).json({ message: 'خطای داخلی سرور.', code: 'INTERNAL_SERVER_ERROR' });
 });
 
+if (!isProduction) app.listen(PORT, () => console.log(`GrowLand API running on http://localhost:${PORT}`));
 export default app;
