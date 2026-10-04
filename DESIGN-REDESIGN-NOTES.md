@@ -1,35 +1,30 @@
-# GrowLand — Neon Turquoise Glassmorphism Refinement
+# GrowLand — Glass UI v2
 
 ## Visual direction
-- Deep blue-green / ink backgrounds, neon turquoise as the primary accent, and restrained cyan secondary highlights.
-- Layered glass surfaces with subtle borders, controlled blur, quiet highlights and softer shadows; reduced reliance on lime-green glows.
-- A more consistent Persian-first type scale and section rhythm, with improved line length and balanced heading wraps.
-- Corrected logo cropping in the top navigation and hero emblem so the leaf mark reads cleanly inside its frame.
-- Persianized prominent UI microcopy that had mixed English labels into Persian sections, while preserving brand names and product terms such as GrowLand and XP.
-- Shared styling across the public home page, membership and login forms, member directory, personal growth dashboard, admin panel, notices, dialogs, loading/error states and controls.
+- Reworked the visual layer around the actual GrowLand botanical identity: deep forest/ink surfaces, leaf green, and a restrained neon-lime accent.
+- Added a final shared glassmorphism layer with translucent gradients, subtle edge highlights, blur/saturation, soft depth, and consistent radii.
+- Unified public landing sections, top navigation, authentication, member directory, growth dashboard, admin panels, forms, cards, modals, and feedback states.
+- Kept Persian-first RTL presentation while retaining product terms and the existing GrowLand logo asset.
 
 ## Responsive behavior
-- Desktop, tablet and phone layouts use explicit breakpoints and minmax-based grids to reduce squeeze/overflow.
-- Mobile navigation remains an accessible dropdown with `aria-expanded` and `aria-controls`.
-- Member/admin side navigation can collapse into compact horizontally scrolling controls at smaller widths.
-- Hero logo, floating cards, headlines, forms, member rows, charts, modals and actions have tuned mobile dimensions down to 320px.
-- Includes visible keyboard focus, a skip link, and reduced-motion support.
+- Added explicit desktop/tablet/mobile breakpoints at 1180px, 900px, 640px, and 380px.
+- Mobile hero, nav dropdown, section grids, signup/signin forms, dashboard KPIs, member cards, admin lists, and dialogs reflow for narrow screens.
+- Added safeguards against horizontal overflow and improved keyboard focus and reduced-motion behavior.
 
-## Main files
-- `src/main.jsx`: retained existing React routes, auth flow, API calls and platform capabilities; refined visible copy for Persian consistency.
-- `src/redesign.css`: unified neon turquoise glassmorphism design system and final responsive refinements.
-- `index.html`: updated browser theme color to match the teal palette.
+## Main changes
+- `src/glass-v2.css`: final design-system overrides and responsive glass UI.
+- `src/main.jsx`: loads the new visual layer after existing styles; routes, auth state, API contracts, and panel functionality are preserved.
+- `index.html`: browser theme color now matches the forest-green palette.
 
 ## Preserved behavior
-- Existing route map (`/`, `/signup`, `/signin`, `/members`, `/dashboard`, `/admin`), auth calls and API contracts.
-- Existing member/dashboard/admin capabilities and public assets.
-- Existing local JSON / Vercel Blob storage architecture.
-
-## Security note
-- The distributable project excludes `.env`. Copy `.env.example` to `.env` for local development and use fresh deployment secrets in your hosting environment. Do not publish a live `.env` file.
+- Existing routes: `/`, `/signup`, `/signin`, `/members`, `/dashboard`, `/admin`.
+- Existing auth/API flows, member/dashboard/admin functionality, logo and public assets.
+- Existing local JSON / Vercel Blob storage architecture. No database has been introduced.
 
 ## Verification
-- JSX parsing: passed using the globally available TypeScript parser.
-- CSS parsing: passed using the globally available PostCSS parser.
-- HTML Persian language / RTL attributes: verified.
-- Full Vite production build and browser-based screenshot test were not completed because `npm install` timed out in this environment. In the project directory, run `npm install`, `npm run build`, then `npm run dev` before deployment.
+- JSX parser validation: run before packaging.
+- CSS parser validation: run before packaging.
+- A full Vite production build still requires installing the project dependencies with `npm install`; `node_modules` is not included in this source archive.
+
+## Deployment reminder
+- `.env` is not included. Configure the required environment variables in the hosting provider and use fresh secrets. After extracting: `npm install`, `npm run build`, then test `npm run dev` before deploying.
