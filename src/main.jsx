@@ -123,14 +123,12 @@ function Navbar({user}){
   useEffect(()=>setOpen(false),[location.pathname,location.hash]);
   useEffect(()=>{
     if(!open) return;
-    const onDocumentClick=(event)=>{
-      if(!navRef.current?.contains(event.target)) setOpen(false);
-    };
+    const onPointerDown=(event)=>{ if(!navRef.current?.contains(event.target)) setOpen(false); };
     const onKeyDown=(event)=>{ if(event.key==='Escape') setOpen(false); };
-    document.addEventListener('click',onDocumentClick);
+    document.addEventListener('pointerdown',onPointerDown);
     document.addEventListener('keydown',onKeyDown);
     return()=>{
-      document.removeEventListener('click',onDocumentClick);
+      document.removeEventListener('pointerdown',onPointerDown);
       document.removeEventListener('keydown',onKeyDown);
     };
   },[open]);
