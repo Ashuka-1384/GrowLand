@@ -199,13 +199,8 @@ API: `http://localhost:3001`
 Build کامل Vite در محیط بررسی فعلی اجرا نشد، چون دریافت dependencyها از npm registry با timeout مواجه شد؛ بنابراین ادعای build موفق بدون اجرای واقعی `npm run build` ارائه نمی‌شود.
 
 
-## GrowLand deployment config (v8)
+## Environment and secret safety
 
-این نسخه یک فایل `.env` واقعی داخل پروژه دارد و API و validator با `dotenv` آن را در زمان اجرا می‌خوانند؛ بنابراین `JWT_SECRET`، `ADMIN_PHONE`، `ADMIN_PASSWORD`، `ADMIN_NAME`، `BLOB_DATA_SECRET` و `BLOB_DB_PATH` دیگر لازم نیست هر بار از صفر ساخته شوند.
+فایل `.env` واقعی عمداً در بسته قرار ندارد. برای توسعه‌ی محلی، `.env.example` را کپی کن و مقادیر لازم را با secretهای اختصاصی خودت جایگزین کن؛ در Vercel نیز secretها را فقط در بخش Environment Variables تنظیم کن. فایل `.env` و فایل‌های محیطی محلی در `.gitignore` قرار دارند و نباید وارد Git یا ZIP قابل اشتراک شوند.
 
-**تنها مقداری که نمی‌توان داخل پروژه تولید کرد `BLOB_READ_WRITE_TOKEN` است**؛ این token credential سرویس Vercel Blob است. کافی است token همان Blob Store را یک‌بار داخل `.env` در فیلد `BLOB_READ_WRITE_TOKEN` قرار بدهی. اگر پروژه را از طریق Git به Vercel deploy می‌کنی، نگه‌داشتن فایل `.env` حاوی secret در repository ریسک امنیتی دارد؛ در آن حالت بهتر است مقادیر secret را در Vercel Project Environment Variables نگه داری.
-
-نام مدیر اصلی نیز دیگر hard-code نیست و در `site.admin.name` ذخیره می‌شود؛ تغییر آن از پنل ادمین پایدار است.
-
-**رمز اولیه مدیر اصلی این نسخه:** `GrowLand@Admin#2026!`
-پس از اولین ورود، در صورت نیاز آن را با ابزار `scripts/hash-password.mjs` عوض کن و مقدار hash جدید را در `ADMIN_PASSWORD` قرار بده.
+برای محیط Production از رمز عبور مدیر پیش‌فرض یا secretهای نمونه استفاده نکن. رمز مدیر باید با `scripts/hash-password.mjs` به scrypt hash تبدیل شود و مقدار هش‌شده در `ADMIN_PASSWORD` قرار بگیرد. پس از تغییر secretها، وضعیت storage و مسیر `/api/health` را قبل از استفاده‌ی واقعی بررسی کن.

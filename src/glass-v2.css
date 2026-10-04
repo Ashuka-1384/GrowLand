@@ -284,3 +284,59 @@ select option { background:#0b1c10; color:#edf7e8; }
   .journey-timeline { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; } }
+
+/* Final design-system pass: keep every legacy component aligned with the GrowLand logo. */
+.dark-showcase {
+  background:radial-gradient(ellipse at 49% 45%,rgba(56,132,63,.18),transparent 56%),linear-gradient(180deg,#0a1b10,#06110c);
+  border-block-color:rgba(222,255,228,.055);
+}
+.cta-band { background:linear-gradient(100deg,#07170d,#15331d 50%,#07170d); }
+.cta-band:before { background:radial-gradient(circle,rgba(181,243,52,.09),transparent 70%); }
+.auth-aside {
+  background:radial-gradient(ellipse at 20% 50%,rgba(94,174,58,.12),transparent 54%),linear-gradient(145deg,#10291a,#06170d 70%);
+  border-color:rgba(222,255,228,.07);
+}
+.auth-aside:before { background:radial-gradient(circle,rgba(181,243,52,.075),transparent 69%); }
+.dashboard-page,.admin-page {
+  background:radial-gradient(ellipse at 83% 4%,rgba(114,196,66,.08),transparent 31%),transparent;
+}
+.progress-track > span { background:linear-gradient(90deg,#83d64b,#c7fa5e); }
+.skill-track span { background:linear-gradient(90deg,#4b9b55,#c1ed5a); }
+.radar-wrap polygon[fill="rgba(116, 231, 63, .14)"] { fill:rgba(181,243,52,.14); }
+.admin-sidebar button b { color:#d9f8a9; background:rgba(181,243,52,.09); }
+::-webkit-scrollbar-track { background:#06110c; }
+::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#b5f334,#4b9b42); border-color:#06110c; }
+::-webkit-scrollbar-thumb:hover { background:#d0ff72; }
+
+/* Touch targets, long-form panels, and narrow-screen safety. */
+button,a,input,select,textarea { touch-action:manipulation; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline-offset:3px; }
+.field input,.field select,.field textarea,input,select,textarea { max-width:100%; }
+.admin-member-copy,.mission-main,.content-head,.dash-section-head,.report-top { min-width:0; }
+@media (max-width:900px) {
+  .site-nav { z-index:100; }
+  .main-nav { max-height:calc(100vh - 92px); max-height:calc(100dvh - 92px); overflow-y:auto; overscroll-behavior:contain; }
+  .dashboard-side,.admin-sidebar { scrollbar-width:none; }
+  .dashboard-side::-webkit-scrollbar,.admin-sidebar::-webkit-scrollbar { display:none; }
+}
+@media (max-width:640px) {
+  .main-nav { max-height:calc(100vh - 84px); max-height:calc(100dvh - 84px); }
+  .member-modal { overflow-y:auto; overscroll-behavior:contain; }
+  .modal-backdrop { align-items:flex-start; overflow-y:auto; overscroll-behavior:contain; }
+  .form-section,.dash-panels,.admin-list-wrap,.admin-create,.admin-pending,.signin-card { backdrop-filter:blur(16px) saturate(125%); -webkit-backdrop-filter:blur(16px) saturate(125%); }
+  .admin-member-item { overflow-wrap:anywhere; }
+}
+@media (max-width:380px) {
+  .brand-word { display:none; }
+  .nav-wrap { gap:7px; }
+  .nav-mini-cta { padding:9px 10px; }
+  .hero-copy h1 { overflow-wrap:anywhere; }
+  .floating-card { max-width:48%; }
+  .card-proof { left:0; }
+  .card-xp { right:0; }
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  .surface,.dash-panels,.admin-list-wrap,.admin-create,.admin-pending,.signin-card,.member-modal,.kpi-card,.member-modern-card,.dashboard-side,.admin-sidebar,.form-section,.principle-item,.journey-node,.notice-card,.skill-tile,.podium-card,.floating-card,.system-badge,.page-hero-stat,.admin-metric {
+    background:rgba(12,31,18,.96);
+  }
+}
