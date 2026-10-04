@@ -6,6 +6,7 @@ import './redesign.css';
 import './glass-v2.css';
 import './experience.css';
 import './neon-glass.css';
+import './responsive-polish.css';
 
 const API = String(import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const DEFAULT_SKILLS = ['طراحی','برنامه‌نویسی','تولید محتوا','فروش و مذاکره','مهارت‌های فردی','کسب‌وکار','نویسندگی','زبان'];
@@ -164,21 +165,19 @@ function Home(){
           <div className="hero-actions"><Link className="button button-main" to="/signup">شروع مسیر <Icon name="arrow" size={18}/></Link><a className="button button-ghost" href="#journey">ببین چطور کار می‌کند <Icon name="chevron" size={17}/></a></div>
           <div className="hero-points"><span><i><Icon name="check" size={13}/></i> بدون امتیازِ صوری</span><span><i><Icon name="check" size={13}/></i> مبتنی بر خروجی واقعی</span><span><i><Icon name="check" size={13}/></i> مسیر شغلی مرحله‌به‌مرحله</span></div>
         </div>
-        <div className="hero-visual growth-preview-wrap" aria-label="پیش‌نمایش داشبورد رشد GrowLand">
-          <div className="preview-orb preview-orb-one" aria-hidden="true"/>
-          <div className="preview-orb preview-orb-two" aria-hidden="true"/>
-          <div className="preview-floating-tag preview-tag-top"><span className="status-dot"/><span>فعالیت این هفته</span><b>+۲۴٪</b></div>
-          <div className="growth-preview">
-            <div className="preview-window-head">
-              <div className="preview-brand"><img src="/growland-logo.jpg" alt=""/><div><small>فضای رشد شخصی</small><b>مرکز فرمان GrowLand</b></div></div>
-              <div className="preview-window-status"><i/><span>زنده</span></div>
-            </div>
-            <div className="preview-greeting"><div><span className="preview-kicker">مسیر شخصی / ۰۱</span><h3>هر قدم، یک پیشرفت واقعی</h3><p>نمایی از رشد تو؛ شفاف، قابل پیگیری و قابل اثبات.</p></div><div className="preview-glyph"><Icon name="spark" size={25}/></div></div>
-            <div className="preview-progress-card"><div className="preview-progress-meta"><span>پیشرفت این هفته</span><strong>۶۸٪</strong></div><div className="preview-progress-track"><span/></div><div className="preview-progress-foot"><span><Icon name="check" size={13}/> ۴ از ۶ فعالیت</span><span>۲ روز پیوسته</span></div></div>
-            <div className="preview-stat-grid"><div className="preview-stat"><span className="preview-stat-icon"><Icon name="chart" size={16}/></span><small>امتیاز رشد</small><strong>۴۲۰ <em>XP</em></strong><i>+۸٪ این ماه</i></div><div className="preview-stat"><span className="preview-stat-icon"><Icon name="shield" size={16}/></span><small>شواهد ثبت‌شده</small><strong>۱۲</strong><i>۳ مورد تازه</i></div><div className="preview-stat"><span className="preview-stat-icon"><Icon name="target" size={16}/></span><small>مهارت‌های فعال</small><strong>۰۵</strong><i>در حال پیشرفت</i></div></div>
-            <div className="preview-activity-card"><div className="preview-activity-head"><div><span className="preview-kicker">از مسیر تو</span><b>آخرین فعالیت‌ها</b></div><span className="preview-see-all">نمای کلی <Icon name="arrow" size={13}/></span></div><div className="preview-activity-row"><span className="preview-activity-icon"><Icon name="check" size={15}/></span><div><b>ساخت یک خروجی واقعی</b><small>شواهد برای بررسی ثبت شد</small></div><span className="preview-activity-status">ثبت شد</span></div><div className="preview-activity-row"><span className="preview-activity-icon muted"><Icon name="spark" size={15}/></span><div><b>تمرین مهارت تخصصی</b><small>قدم بعدی مسیر رشد</small></div><span className="preview-activity-next">در جریان</span></div></div>
+        <div className="hero-visual brand-hero-visual" aria-label="لوگوی متحرک گرولند">
+          <div className="brand-orbit brand-orbit-outer" aria-hidden="true"/>
+          <div className="brand-orbit brand-orbit-middle" aria-hidden="true"/>
+          <div className="brand-orbit brand-orbit-inner" aria-hidden="true"/>
+          <div className="brand-halo brand-halo-one" aria-hidden="true"/>
+          <div className="brand-halo brand-halo-two" aria-hidden="true"/>
+          <span className="brand-orbit-point brand-orbit-point-a" aria-hidden="true"/>
+          <span className="brand-orbit-point brand-orbit-point-b" aria-hidden="true"/>
+          <span className="brand-orbit-point brand-orbit-point-c" aria-hidden="true"/>
+          <div className="brand-logo-aura" aria-hidden="true"/>
+          <div className="brand-logo-frame">
+            <img src="/growland-logo.jpg" alt="لوگوی گرولند" fetchPriority="high" />
           </div>
-          <div className="preview-floating-tag preview-tag-bottom"><span className="preview-tag-icon"><Icon name="shield" size={15}/></span><span><small>رشد قابل اثبات</small><b>پروفایل آماده ارائه</b></span></div>
         </div>
       </div>
       <div className="hero-bottom"><div className="hero-bottom-track"><span>رشد</span><i/><span>شواهد</span><i/><span>توانمندی</span><i/><span>فرصت</span></div></div>

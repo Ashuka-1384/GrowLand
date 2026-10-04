@@ -115,3 +115,13 @@
 - Added `PATCH /api/admin/profile` for root-admin profile name changes.
 - Added `DELETE /api/admin/reports/:id` and a delete action in the admin reports UI.
 - Existing root-admin-only admin promotion/demotion controls were retained and hardened.
+
+
+## 2026-10-04 — mobile responsiveness and animated logo hero
+
+- Replaced the homepage mock dashboard UI with the original GrowLand logo only, presented inside an animated neon-glass frame.
+- Added rotating orbit rings, pulsing glow and gentle floating motion; respects `prefers-reduced-motion`.
+- Reworked mobile hero ordering so the logo is visible above the copy, with stack-first CTAs, improved text sizing and a normal-flow trust strip that no longer overlaps the heading.
+- Fixed mobile navigation grid placement so the logo, membership/profile action and menu use separate columns.
+- Added `src/responsive-polish.css` to normalize overflow, min-width constraints and narrow-screen layouts across member and admin panels.
+- JSX syntax and all six CSS layers passed parser checks. `npm install` again timed out, so a full Vite build and integrated browser test are not confirmed in this environment.
