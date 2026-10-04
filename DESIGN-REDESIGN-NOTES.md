@@ -1,33 +1,33 @@
-# GrowLand — Glass UI v3
+# GrowLand — Glass Experience v4
 
-## Design direction
-- Persian-first RTL design built around the GrowLand logo: deep forest surfaces, botanical greens, restrained leaf-lime highlights, and high-contrast typography.
-- Glassmorphism applied consistently to navigation, landing sections, signup/signin, member directory, growth dashboard, admin center, cards, forms, and dialogs.
-- Removed the leftover cyan/teal palette from the older style iteration so public and private areas share one coherent brand system.
-- Preserved the supplied logo asset and the existing content hierarchy while improving spacing, borders, surface depth, hover, focus, and empty/loading/error states.
+## What changed in this pass
+- Rebuilt the homepage hero visual from a static, oversized logo surrounded by rings into a detailed glass dashboard preview showing weekly progress, XP, evidence, skills, and recent activity.
+- Changed the global navigation from a full-width bar into a floating, translucent glass capsule with a responsive menu.
+- Reworked the shared design layer for the philosophy cards, growth timeline, community cards, member directory, signup/signin, member growth dashboard, admin sidebar, management lists, forms, and dialogs.
+- Consolidated the palette around the supplied GrowLand mark: forest green, translucent botanical surfaces, leaf-lime highlights, cool pale text, and subtle emerald light. The fresh style is in `src/experience.css` and is loaded last to override the earlier design iterations.
+- Preserved API endpoints, React routes, form behavior, authorization, and storage implementation. No new database was introduced.
 
 ## Responsive behavior
-- Breakpoints cover desktop, tablet, mobile, and very narrow mobile screens (1180px, 900px, 640px, and 380px).
-- Navigation collapses to an accessible mobile menu with constrained height and its own scrolling behavior.
-- Hero, timeline, forms, member cards, dashboard metrics, admin lists, profile editing, and modal actions reflow on narrow screens.
-- Long admin content and member details wrap safely; modal content and horizontal dashboard navigation remain scrollable on touch devices.
-- Includes keyboard-visible focus, skip navigation, reduced-motion support, and a higher-opacity fallback when backdrop filters are not supported.
+- Breakpoints cover desktop, tablet, mobile, and narrow mobile screens (1180px, 900px, 640px, and 380px).
+- At mobile sizes, the primary navigation becomes a closed-by-default glass menu; the hero stacks; signup fields, KPI cards, journey tiles, member cards, admin lists, and modal actions reflow to fit the screen.
+- Long names and submitted evidence wrap safely; admin/member side navigation scrolls horizontally when needed; modals retain internal scrolling.
+- Visible keyboard focus, skip navigation, reduced-motion support, and a solid-surface fallback for browsers without `backdrop-filter` are retained.
 
 ## Preserved functionality
-- Routes remain: `/`, `/signup`, `/signin`, `/members`, `/dashboard`, `/admin`.
-- Existing auth session, API contracts, member directory, profile, growth activities, submissions, assessment, and admin workflows are kept.
-- Existing JSON/local and private Vercel Blob storage approach is unchanged; no database dependency has been added.
-- The `.env` file is not included in the source package. Secret samples use placeholders and local environment files are ignored by Git.
+- Routes remain `/`, `/signup`, `/signin`, `/members`, `/dashboard`, and `/admin`.
+- Auth/session behavior, public member directory, member profile, growth activities, evidence submissions, assessments, and admin workflows remain in `src/main.jsx` and the existing server/API files.
+- The existing JSON/local and private Vercel Blob storage approach is unchanged. No database dependency was added.
+- The `.env` file is not included. Configure local/deployment secrets from `.env.example`; never commit live secrets.
 
-## Verification
-- JSX transpilation/parser validation: passed.
-- CSS parser validation for `styles.css`, `redesign.css`, `glass-v2.css`: passed.
+## Verification status
+- TypeScript JSX transpilation/syntax pass: passed.
+- CSS parser checks for `styles.css`, `redesign.css`, `glass-v2.css`, and `experience.css`: passed.
 - Node syntax checks for server, API, and utility scripts: passed.
-- `package.json`, `vercel.json`, and seed JSON validity: checked before packaging.
-- Full Vite production build could not be run in this environment because npm registry DNS resolution failed (`EAI_AGAIN`). Run `npm install` and `npm run build` locally or in CI before deployment.
+- Package JSON, Vercel config, and seed JSON: parsed successfully.
+- A full Vite production build is **not confirmed** in this environment because dependency installation did not complete within the available time. Run `npm install` followed by `npm run build` before deployment, then test signup/signin, member dashboard, and admin workflows on staging.
 
 ## Deployment
 1. Extract the archive and open `growland-project/` as the project root.
-2. Set the required environment variables from `.env.example` using fresh values; never commit `.env`.
+2. Set environment variables from `.env.example` with actual deployment values.
 3. Run `npm install` and `npm run build`.
-4. Test signup/signin, a member dashboard, and admin workflows in a staging deployment before replacing the live version.
+4. Test all main routes and auth/member/admin workflows in a staging deployment before replacing the live version.
