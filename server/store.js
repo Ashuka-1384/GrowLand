@@ -63,6 +63,7 @@ function decrypt(payload) {
 
 export function normalizeDB(db) {
   return {
+    revision: Number.isInteger(db?.revision) ? db.revision : 0,
     members: Array.isArray(db?.members) ? db.members : [],
     reports: Array.isArray(db?.reports) ? db.reports : [],
     announcements: Array.isArray(db?.announcements) ? db.announcements : [],
@@ -142,6 +143,7 @@ export async function readDB({ fresh = false } = {}) {
 export function writeDB(db) {
   const operation = async () => {
     const normalized = normalizeDB(db);
+    normalized.revision = Number(normalized.revision || 0) + 1;
     if (hasBlob()) {
       await writeBlobDatabase(normalized);
     } else {

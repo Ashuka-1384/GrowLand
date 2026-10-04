@@ -157,6 +157,7 @@ function safeUser(m) {
     ...x,
     xp: Math.max(0, Number(x.xp) || 0),
     level: calcLevel(x.xp),
+    levelProgress: ((Math.max(0, Number(x.xp) || 0) % 1000) / 10),
     ready: x.jobReadiness?.status === 'job_ready'
   };
 }
@@ -170,6 +171,7 @@ function publicUser(m) {
     skills: Array.isArray(m.skills) ? m.skills.map(s => skillTemplate(s.name, s.xp, s.level)) : [],
     xp: Math.max(0, Number(m.xp) || 0),
     level: calcLevel(m.xp),
+    levelProgress: ((Math.max(0, Number(m.xp) || 0) % 1000) / 10),
     ready: m.jobReadiness?.status === 'job_ready',
     jobReadiness: m.jobReadiness?.status || 'not_ready',
     profileComplete: m.profileComplete !== false,
@@ -216,6 +218,14 @@ function auth(req, res, next) {
     res.status(401).json({ message: 'نیاز به ورود دارید.' });
   }
 }
+
+function readAuth(req) {
+  const header = req.headers.authorization || '';
+  const raw = header.startsWith('Bearer ') ? header.slice(7).trim() : cookieValue(req, 'growland_session');
+  if (!raw) return null;
+  try { return jwt.verify(raw, JWT_SECRET, { issuer: 'growland', audience: 'growland-web' }); }
+  catch { return null; }
+}
 function admin(req, res, next) {
   if (req.auth?.role !== 'admin') return res.status(403).json({ message: 'دسترسی ادمین لازم است.' });
   next();
@@ -225,7 +235,7 @@ function rootAdmin(req, res, next) {
   next();
 }
 function memberFromDB(db, id) {
-  return (db.members || []).find(x => x.id === id);
+  return (db.members || []).find(x => x.id === id && !x.deletedAt);
 }
 function requireMember(req, res, db) {
   if (req.auth?.sub === 'admin-root') return null;
@@ -295,7 +305,7 @@ function ensureDomain(db) {
   return db;
 }
 async function loadDB() {
-  return ensureDomain(await readDB({ fresh: true }));
+  return ensureDomain(await readDB());
 }
 async function saveDB(db) {
   return writeDB(ensureDomain(db));
@@ -339,7 +349,7 @@ app.get('/api/public/members', async (req, res) => {
   try {
     const db = await loadDB();
     const members = db.members
-      .filter(m => m.profileComplete !== false)
+      .filter(m => m.profileComplete !== false && !m.deletedAt)
       .sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
     res.json({ members: members.map(publicUser) });
   } catch (err) {
@@ -412,7 +422,7 @@ app.post('/api/auth/login', rateLimit({ windowMs: 60_000, max: 10 }), async (req
   }
 
   const db = await loadDB();
-  const member = db.members.find(m => m.phone === phone);
+  const member = db.members.find(m => m.phone === phone && !m.deletedAt);
   if (!member) return res.status(401).json({ message: 'شماره موبایل یا رمز عبور نادرست است.' });
 
   const valid = Boolean(member.passwordHash) && verifyPassword(password, member.passwordHash);
@@ -452,15 +462,17 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-app.get('/api/auth/me', auth, async (req, res) => {
+app.get('/api/auth/me', async (req, res) => {
+  const decoded = readAuth(req);
+  if (!decoded) return res.status(200).json({ user: null });
   try {
-    if (req.auth?.sub === 'admin-root') {
+    if (decoded.sub === 'admin-root') {
       const db = await loadDB();
       return res.json({ user: { id: 'admin-root', name: rootAdminName(db), phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true } });
     }
     const db = await loadDB();
-    const m = memberFromDB(db, req.auth.sub);
-    if (!m) return res.status(401).json({ message: 'کاربر یافت نشد.' });
+    const m = memberFromDB(db, decoded.sub);
+    if (!m) return res.status(200).json({ user: null });
     res.json({ user: safeUser(m) });
   } catch (err) {
     return storageFailure(res, err, 'ذخیره‌سازی GrowLand در دسترس نیست.');
@@ -737,11 +749,10 @@ app.delete('/api/admin/members/:id', auth, admin, rootAdmin, async (req, res) =>
   const m = memberFromDB(db, req.params.id);
   if (!m) return res.status(404).json({ message: 'عضو یافت نشد.' });
   if (m.phone === ADMIN_PHONE) return res.status(400).json({ message: 'ادمین اصلی قابل حذف نیست.' });
-  db.members = db.members.filter(x => x.id !== req.params.id);
-  db.reports = db.reports.filter(x => x.memberId !== req.params.id);
-  db.submissions = db.submissions.filter(x => x.memberId !== req.params.id);
-  db.assessments = db.assessments.filter(x => x.memberId !== req.params.id);
-  audit(db, req.auth.sub, 'member.deleted', m.id);
+  m.deletedAt = new Date().toISOString();
+  m.profileComplete = false;
+  m.role = 'member';
+  audit(db, req.auth.sub, 'member.deleted', m.id, { softDelete: true });
   await saveDB(db);
   res.json({ ok: true });
 });

@@ -11,7 +11,10 @@
     "start": "node server/index.js",
     "preview": "vite preview",
     "validate:env": "node scripts/validate-env.mjs",
-    "generate:secrets": "node scripts/generate-secrets.mjs"
+    "generate:secrets": "node scripts/generate-secrets.mjs",
+    "check": "node --check server/index.js && node --check server/store.js && node --check api/index.js",
+    "typecheck": "node scripts/typecheck.mjs",
+    "test": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
     "@vercel/blob": "2.6.1",
@@ -27,5 +30,8 @@
     "@vitejs/plugin-react": "5.0.4",
     "concurrently": "9.2.1",
     "vite": "7.1.7"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }
