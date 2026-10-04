@@ -125,3 +125,24 @@
 - Fixed mobile navigation grid placement so the logo, membership/profile action and menu use separate columns.
 - Added `src/responsive-polish.css` to normalize overflow, min-width constraints and narrow-screen layouts across member and admin panels.
 - JSX syntax and all six CSS layers passed parser checks. `npm install` again timed out, so a full Vite build and integrated browser test are not confirmed in this environment.
+
+## 2026-10-04 — Navbar responsiveness and readability refinement
+
+- Reworked the final navigation layer with a three-zone desktop grid and a stable two-zone tablet/mobile grid, removing the implicit third-column behavior that could produce crowding.
+- Switched tablet layouts at 1024px and below to a compact, scrollable glass dropdown with a clear open state and adequate tap targets.
+- Added viewport-aware handling for 760px, 390px, and 340px widths, plus safe-area insets for mobile devices.
+- Improved contrast and legibility for navigation links, profile labels, branding microcopy, and dropdown items.
+- Preserved the original GrowLand logo with `object-fit: contain` and removed the redundant second membership CTA from the menu; the dedicated membership CTA remains in the header.
+- No changes to API routes, authentication logic, or business data.
+- CSS parse validation and Node syntax checks passed. A full Vite build was not run because dependencies are not installed in this environment and offline npm installation could not find the required package cache.
+
+
+## 2026-10-04 — Navbar responsiveness and readability refinement
+
+- Reworked the final navigation layer with a three-zone desktop grid and a stable two-zone tablet/mobile grid, removing the implicit third-column behavior that could produce crowding.
+- Switched tablet layouts at 1024px and below to a compact, scrollable glass dropdown with a clear open state and adequate tap targets.
+- Added viewport-aware handling for 760px, 390px, and 340px widths, plus safe-area insets for mobile devices.
+- Improved contrast and legibility for navigation links, profile labels, branding microcopy, and dropdown items.
+- Preserved the original GrowLand logo with `object-fit: contain` and removed the redundant second membership CTA from the menu; the dedicated membership CTA remains in the header.
+- No changes to API routes, authentication logic, or business data.
+- CSS parse validation and Node syntax checks passed. A full Vite build was not run because dependencies are not installed in this environment and offline npm installation could not find the required package cache.
