@@ -5,6 +5,7 @@ import './styles.css';
 import './redesign.css';
 import './glass-v2.css';
 import './experience.css';
+import './neon-glass.css';
 
 const API = String(import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const DEFAULT_SKILLS = ['طراحی','برنامه‌نویسی','تولید محتوا','فروش و مذاکره','مهارت‌های فردی','کسب‌وکار','نویسندگی','زبان'];
@@ -97,7 +98,7 @@ function Icon({name,size=20,stroke=1.7}){
 }
 
 function Logo({withWord=true}){
-  return <Link to="/" className="brand-lockup"><span className="logo-mark"><img src="/growland-logo.jpg" alt="GrowLand"/></span>{withWord&&<span className="brand-word"><strong>Grow</strong><b>Land</b><small>رشد در کنار هم · فراتر رفتن</small></span>}</Link>;
+  return <Link to="/" className="brand-lockup"><span className="logo-mark" aria-label="نشان گرولند"><img src="/growland-logo.jpg" alt="نشان کامل GrowLand"/></span>{withWord&&<span className="brand-word"><strong>Grow</strong><b>Land</b><small>رشد در کنار هم · فراتر رفتن</small></span>}</Link>;
 }
 
 function App(){
