@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import crypto from 'node:crypto';
 
 const production = String(process.env.NODE_ENV || '').toLowerCase() === 'production';

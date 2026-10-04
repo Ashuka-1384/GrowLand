@@ -106,3 +106,12 @@
 
 ### Deployment limitation
 - اجرای کامل `npm install` در محیط بررسی به علت timeout رجیستری npm موفق نشد؛ در نتیجه Vite production build به‌صورت واقعی در این محیط verify نشده است.
+
+
+## 2026-10-04 — requested admin/deployment fixes
+
+- Added a real `.env` deployment configuration with persistent generated JWT/Blob secrets, configured admin phone, admin password hash, admin name and Blob namespace.
+- Added `ADMIN_NAME` support; the root admin name is persisted in the storage document and can be edited from the admin dashboard.
+- Added `PATCH /api/admin/profile` for root-admin profile name changes.
+- Added `DELETE /api/admin/reports/:id` and a delete action in the admin reports UI.
+- Existing root-admin-only admin promotion/demotion controls were retained and hardened.

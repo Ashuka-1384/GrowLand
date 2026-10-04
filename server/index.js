@@ -13,6 +13,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const ADMIN_PHONE = normalizePhone(process.env.ADMIN_PHONE || '');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const DEFAULT_ADMIN_NAME = String(process.env.ADMIN_NAME || 'GrowLand Admin').trim().slice(0, 80) || 'GrowLand Admin';
 
 if (isProduction && String(process.env.JWT_SECRET || '').length < 32) {
   throw new Error('JWT_SECRET must be configured with at least 32 characters in production.');
@@ -263,6 +264,17 @@ function addSkillXP(member, skillName, amount) {
   skill.level = Math.min(5, Math.floor(skill.xp / 250) + 1);
 }
 
+function rootAdminName(db) {
+  return String(db?.site?.admin?.name || DEFAULT_ADMIN_NAME).trim().slice(0, 80) || DEFAULT_ADMIN_NAME;
+}
+
+function setRootAdminName(db, name) {
+  db.site = db.site && typeof db.site === 'object' ? db.site : {};
+  db.site.admin = db.site.admin && typeof db.site.admin === 'object' ? db.site.admin : {};
+  db.site.admin.name = String(name).trim().slice(0, 80) || DEFAULT_ADMIN_NAME;
+  return db.site.admin.name;
+}
+
 function ensureDomain(db) {
   db.members = Array.isArray(db.members) ? db.members : [];
   db.reports = Array.isArray(db.reports) ? db.reports : [];
@@ -393,7 +405,8 @@ app.post('/api/auth/login', rateLimit({ windowMs: 60_000, max: 10 }), async (req
     if (!verifyAdminPassword(password)) {
       return res.status(401).json({ message: 'شماره موبایل یا رمز عبور نادرست است.' });
     }
-    const adminUser = { id: 'admin-root', name: 'GrowLand Admin', phone, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true };
+    const db = await loadDB();
+    const adminUser = { id: 'admin-root', name: rootAdminName(db), phone, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true };
     setAuthCookie(res, tokenFor(adminUser));
     return res.json({ user: adminUser });
   }
@@ -442,7 +455,8 @@ app.post('/api/auth/logout', (req, res) => {
 app.get('/api/auth/me', auth, async (req, res) => {
   try {
     if (req.auth?.sub === 'admin-root') {
-      return res.json({ user: { id: 'admin-root', name: 'GrowLand Admin', phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true } });
+      const db = await loadDB();
+      return res.json({ user: { id: 'admin-root', name: rootAdminName(db), phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true } });
     }
     const db = await loadDB();
     const m = memberFromDB(db, req.auth.sub);
@@ -455,10 +469,15 @@ app.get('/api/auth/me', auth, async (req, res) => {
 
 app.get('/api/member/dashboard', auth, async (req, res) => {
   if (req.auth?.sub === 'admin-root') {
-    return res.json({
-      member: { id: 'admin-root', name: 'GrowLand Admin', phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [skillTemplate('مدیریت GrowLand')], ready: true, jobReadiness: { status: 'job_ready' }, roadmap: 'پنل رشد مدیر اصلی' },
-      reports: [], growth: [...Array(7)].map((_, i) => ({ label: `روز ${i + 1}`, xp: 0 })), activities: [], submissions: []
-    });
+    try {
+      const db = await loadDB();
+      return res.json({
+        member: { id: 'admin-root', name: rootAdminName(db), phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [skillTemplate('مدیریت GrowLand')], ready: true, jobReadiness: { status: 'job_ready' }, roadmap: 'پنل رشد مدیر اصلی' },
+        reports: [], growth: [...Array(7)].map((_, i) => ({ label: `روز ${i + 1}`, xp: 0 })), activities: [], submissions: []
+      });
+    } catch (err) {
+      return storageFailure(res, err, 'ذخیره‌سازی GrowLand در دسترس نیست.');
+    }
   }
   try {
     const db = await loadDB();
@@ -473,9 +492,22 @@ app.get('/api/member/dashboard', auth, async (req, res) => {
   }
 });
 
+app.patch('/api/admin/profile', auth, admin, rootAdmin, async (req, res) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+    if (name.length < 2 || name.length > 80) return res.status(400).json({ message: 'نام باید بین ۲ تا ۸۰ کاراکتر باشد.' });
+    const db = await loadDB();
+    const savedName = setRootAdminName(db, name);
+    audit(db, req.auth.sub, 'admin.profile-updated', 'admin-root', { field: 'name' });
+    await saveDB(db);
+    res.json({ user: { id: 'admin-root', name: savedName, phone: ADMIN_PHONE, role: 'admin', xp: 0, level: 1, skills: [], profileComplete: true, ready: true } });
+  } catch (e) {
+    return storageFailure(res, e, 'تغییر نام مدیر اصلی انجام نشد.');
+  }
+});
+
 app.put('/api/member/profile', auth, async (req, res) => {
   try {
-    if (req.auth?.sub === 'admin-root') return res.status(403).json({ message: 'پروفایل مدیر اصلی از این بخش قابل ویرایش نیست.' });
     const db = await loadDB();
     const m = requireMember(req, res, db);
     if (!m) return res.status(403).json({ message: 'این عملیات برای مدیر اصلی مجاز نیست.' });
@@ -524,6 +556,20 @@ app.post('/api/member/reports', auth, async (req, res) => {
   } catch (e) {
     console.error('REPORT_ERROR', e);
     res.status(500).json({ message: 'خطا در ارسال گزارش.' });
+  }
+});
+
+app.delete('/api/admin/reports/:id', auth, admin, async (req, res) => {
+  try {
+    const db = await loadDB();
+    const index = db.reports.findIndex(r => r.id === req.params.id);
+    if (index === -1) return res.status(404).json({ message: 'گزارش پیدا نشد.' });
+    const [report] = db.reports.splice(index, 1);
+    audit(db, req.auth.sub, 'report.deleted', report.id, { memberId: report.memberId || null });
+    await saveDB(db);
+    res.json({ ok: true });
+  } catch (err) {
+    return storageFailure(res, err, 'حذف گزارش انجام نشد.');
   }
 });
 
