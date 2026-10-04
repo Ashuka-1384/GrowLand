@@ -1,4 +1,4 @@
-import React, { Component, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import './styles.css';
@@ -119,21 +119,40 @@ function Site({auth}){
 function Navbar({user}){
   const [open,setOpen]=useState(false);
   const location=useLocation();
+  const navRef=useRef(null);
   useEffect(()=>setOpen(false),[location.pathname,location.hash]);
+  useEffect(()=>{
+    if(!open) return;
+    const onPointerDown=(event)=>{ if(!navRef.current?.contains(event.target)) setOpen(false); };
+    const onKeyDown=(event)=>{ if(event.key==='Escape') setOpen(false); };
+    document.addEventListener('pointerdown',onPointerDown);
+    document.addEventListener('keydown',onKeyDown);
+    return()=>{
+      document.removeEventListener('pointerdown',onPointerDown);
+      document.removeEventListener('keydown',onKeyDown);
+    };
+  },[open]);
+  useEffect(()=>{
+    const compact=window.matchMedia?.('(max-width: 760px)');
+    const sync=()=>document.documentElement.classList.toggle('nav-menu-open',open && compact?.matches);
+    sync(); compact?.addEventListener?.('change',sync);
+    return()=>{ compact?.removeEventListener?.('change',sync); document.documentElement.classList.remove('nav-menu-open'); };
+  },[open]);
+  const closeMenu=()=>setOpen(false);
   const logout=async()=>{try{await api('/auth/logout',{method:'POST'});}finally{window.location.href='/signin';}};
-  return <header className="site-nav">
+  return <header className={open?'site-nav menu-open':'site-nav'} ref={navRef}>
     <div className="nav-wrap">
       <Logo/>
       <nav id="primary-navigation" className={open?'main-nav is-open':'main-nav'}>
-        <a href="/#about">درباره گرولند</a><a href="/#journey">مسیر رشد</a><NavLink to="/members">اعضای جامعه</NavLink>
-        {user?<NavLink to="/dashboard">فضای رشد من</NavLink>:<NavLink to="/signin">ورود</NavLink>}
-        {user?.role==='admin'&&<NavLink to="/admin">مدیریت</NavLink>}
-        {!user&&<NavLink to="/signup" className="nav-primary">شروع عضویت <Icon name="arrow" size={16}/></NavLink>}
-        {user&&<button className="nav-logout" onClick={logout}><Icon name="logout" size={16}/> خروج</button>}
+        <a href="/#about" onClick={closeMenu}>درباره گرولند</a><a href="/#journey" onClick={closeMenu}>مسیر رشد</a><NavLink to="/members" onClick={closeMenu}>اعضای جامعه</NavLink>
+        {user?<NavLink to="/dashboard" onClick={closeMenu}>فضای رشد من</NavLink>:<NavLink to="/signin" onClick={closeMenu}>ورود</NavLink>}
+        {user?.role==='admin'&&<NavLink to="/admin" onClick={closeMenu}>مدیریت</NavLink>}
+        {!user&&<NavLink to="/signup" className="nav-primary" onClick={closeMenu}>شروع عضویت <Icon name="arrow" size={16}/></NavLink>}
+        {user&&<button className="nav-logout" onClick={logout}> <Icon name="logout" size={16}/> خروج</button>}
       </nav>
       <div className="nav-end">
-        {user?<Link className="mini-profile" to="/dashboard"><span className="avatar tiny">{initials(user.name)}</span><span>{user.name?.split(' ')[0]}</span></Link>:<Link className="nav-mini-cta" to="/signup">عضویت</Link>}
-        <button className="menu-btn" onClick={()=>setOpen(x=>!x)} aria-label={open?'بستن منو':'باز کردن منو'} aria-expanded={open} aria-controls="primary-navigation"><Icon name={open?'x':'menu'} size={22}/></button>
+        {user?<Link className="mini-profile" to="/dashboard" onClick={closeMenu}><span className="avatar tiny">{initials(user.name)}</span><span>{user.name?.split(' ')[0]}</span></Link>:<Link className="nav-mini-cta" to="/signup" onClick={closeMenu}>عضویت</Link>}
+        <button type="button" className="menu-btn" onClick={()=>setOpen(x=>!x)} aria-label={open?'بستن منو':'باز کردن منو'} aria-expanded={open} aria-controls="primary-navigation"><Icon name={open?'x':'menu'} size={22}/></button>
       </div>
     </div>
   </header>;

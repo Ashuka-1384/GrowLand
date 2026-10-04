@@ -3916,3 +3916,257 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .signup-form-head h2 { font-size: 27px; }
   .signup-form .form-section-head h3 { font-size: 15px; }
 }
+
+/* ========================================================================
+   GrowLand responsive hardening — final mobile/compact layer
+   This layer intentionally comes last so older responsive patches cannot
+   reintroduce clipping, fixed-width overflow, or collapsed controls.
+   ======================================================================== */
+html.nav-menu-open,
+html.nav-menu-open body { overflow-x: hidden; }
+
+.site-nav,
+.site-nav.menu-open { overflow: visible !important; contain: none !important; isolation: isolate; }
+.site-nav .nav-wrap { overflow: visible !important; contain: none !important; }
+.site-nav .main-nav { max-width: none; }
+
+/* Keep the interactive header above every decorative section. */
+.site-nav { z-index: 5000; }
+.site-nav .main-nav { z-index: 5001; }
+.site-nav .nav-end,
+.site-nav .brand-lockup { position: relative; z-index: 5002; }
+
+/* The mobile menu is a real overlay, not a clipped child of the header. */
+@media (max-width: 1024px) {
+  .site-nav .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+  .site-nav .main-nav,
+  .site-nav .main-nav.is-open {
+    position: absolute;
+    top: calc(100% + 9px);
+    right: 0;
+    left: 0;
+    width: auto;
+    max-height: calc(100svh - 100px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 9px;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    border-radius: 19px;
+    background: rgba(4,17,9,.985);
+    border: 1px solid rgba(190,255,120,.17);
+    box-shadow: 0 28px 80px rgba(0,0,0,.58);
+    backdrop-filter: blur(24px) saturate(125%);
+    -webkit-backdrop-filter: blur(24px) saturate(125%);
+  }
+  .site-nav .main-nav.is-open { display: flex !important; }
+  .site-nav .main-nav > a,
+  .site-nav .main-nav > .nav-logout {
+    width: 100%; min-height: 48px; justify-content: space-between;
+    padding: 12px 14px; border-radius: 13px; font-size: 13px;
+  }
+  .site-nav .main-nav > .nav-primary { display: inline-flex !important; justify-content: center; margin-top: 4px; }
+  .site-nav .main-nav > a.active:after,
+  .site-nav .main-nav > a[aria-current="page"]:after { display: none; }
+}
+
+@media (max-width: 760px) {
+  body { min-width: 0; }
+  .site-frame { overflow-x: clip; overflow-y: visible; }
+  .site-nav {
+    left: max(7px, env(safe-area-inset-left));
+    right: max(7px, env(safe-area-inset-right));
+    top: max(7px, env(safe-area-inset-top));
+    height: 64px;
+  }
+  .site-nav .nav-wrap {
+    width: calc(100% - 14px);
+    min-width: 0;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap: 8px;
+  }
+  .site-nav .brand-lockup { min-width: 0; }
+  .site-nav .logo-mark { flex: 0 0 42px; width: 42px; height: 42px; }
+  .site-nav .nav-end { min-width: 0; gap: 7px; }
+  .site-nav .nav-mini-cta { min-width: 72px; min-height: 40px; padding-inline: 12px; white-space: nowrap; }
+  .site-nav .menu-btn { flex: 0 0 42px; width: 42px; height: 42px; }
+  .site-nav .main-nav,
+  .site-nav .main-nav.is-open {
+    position: absolute;
+    top: calc(100% + 9px);
+    right: max(5px, env(safe-area-inset-right));
+    left: max(5px, env(safe-area-inset-left));
+    width: auto;
+    max-height: calc(100svh - 92px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 9px;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    border-radius: 19px;
+    background: rgba(4,17,9,.985);
+    border: 1px solid rgba(190,255,120,.17);
+    box-shadow: 0 28px 80px rgba(0,0,0,.58), 0 0 0 1px rgba(255,255,255,.02);
+    backdrop-filter: blur(24px) saturate(125%);
+    -webkit-backdrop-filter: blur(24px) saturate(125%);
+    transform: translateZ(0);
+  }
+  .site-nav .main-nav.is-open { display: flex !important; }
+  .site-nav .main-nav > a,
+  .site-nav .main-nav > .nav-logout {
+    width: 100%;
+    min-height: 48px;
+    flex: 0 0 auto;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 13px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .site-nav .main-nav > a:hover,
+  .site-nav .main-nav > a:focus-visible,
+  .site-nav .main-nav > a.active,
+  .site-nav .main-nav > a[aria-current="page"],
+  .site-nav .main-nav > .nav-logout:hover {
+    background: rgba(184,255,61,.075);
+  }
+  .site-nav .main-nav > .nav-primary {
+    display: inline-flex !important;
+    margin-top: 4px;
+    justify-content: center;
+    background: var(--lime) !important;
+    color: #0a1207 !important;
+    border-color: transparent !important;
+  }
+  .site-nav .main-nav > a.active:after,
+  .site-nav .main-nav > a[aria-current="page"]:after { display: none; }
+
+  /* Make all major layouts collapse before they become cramped. */
+  .hero-inner,
+  .dashboard-layout,
+  .admin-shell,
+  .profile-editor,
+  .dashboard-two-col,
+  .admin-activity-layout,
+  .admin-managers-page { min-width: 0; }
+  .hero-inner { grid-template-columns: 1fr; }
+  .dashboard-layout,
+  .admin-shell,
+  .profile-editor,
+  .dashboard-two-col,
+  .admin-activity-layout { grid-template-columns: 1fr; }
+  .dashboard-side,
+  .admin-sidebar { min-width: 0; width: 100%; }
+  .dashboard-side { overflow-x: auto; }
+  .admin-sidebar { overflow-x: auto; }
+
+  .container,
+  .hero-inner,
+  .signup-shell { width: calc(100% - 28px); max-width: none; }
+  .section-shell,
+  .page-wrap,
+  .dashboard-page,
+  .admin-page { overflow: clip; }
+
+  /* Touch-friendly controls. */
+  .button { min-height: 46px; }
+  input, select, textarea { max-width: 100%; }
+  .fields-2 { grid-template-columns: minmax(0,1fr); }
+  .inline-form { grid-template-columns: 1fr; }
+  .inline-form .button { width: 100%; }
+
+  /* Cards and lists must never force the viewport wider. */
+  .member-grid-modern,
+  .dashboard-kpis,
+  .admin-kpis,
+  .skill-field-grid,
+  .journey-timeline { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .admin-member-item { grid-template-columns: auto auto minmax(0,1fr) auto; }
+  .admin-member-item > .admin-member-level,
+  .admin-member-item > .admin-member-xp { display: none; }
+  .admin-member-copy { min-width: 0; overflow: hidden; }
+  .admin-member-copy strong,
+  .admin-member-copy span { display: block; overflow-wrap: anywhere; white-space: normal; }
+  .report-actions,
+  .modal-actions { display: grid; grid-template-columns: 1fr; }
+  .report-actions .button,
+  .modal-actions .button { width: 100%; }
+  .toast { right: 12px; left: 12px; bottom: 12px; width: auto; max-width: none; }
+
+  /* Signup/auth: preserve hierarchy instead of shrinking text. */
+  .signup-shell { grid-template-columns: 1fr; }
+  .signup-intro { position: relative; top: auto; min-height: 0; }
+  .signup-form-head { align-items: stretch; }
+  .signup-form { min-width: 0; }
+  .signup-submit-row { align-items: stretch; flex-direction: column; }
+  .signup-submit { width: 100%; min-width: 0; }
+}
+
+@media (max-width: 520px) {
+  .container,
+  .hero-inner,
+  .signup-shell { width: calc(100% - 22px); }
+  .site-nav { left: 6px; right: 6px; }
+  .site-nav .nav-wrap { width: calc(100% - 12px); gap: 6px; }
+  .site-nav .logo-mark { flex-basis: 40px; width: 40px; height: 40px; }
+  .site-nav .nav-end { gap: 5px; }
+  .site-nav .nav-mini-cta { min-width: 68px; min-height: 40px; padding-inline: 10px; font-size: 11px; }
+  .site-nav .menu-btn { flex-basis: 40px; width: 40px; height: 40px; }
+  .site-nav .main-nav,
+  .site-nav .main-nav.is-open { right: 3px; left: 3px; }
+  .member-grid-modern,
+  .dashboard-kpis,
+  .admin-kpis,
+  .skill-field-grid,
+  .journey-timeline { grid-template-columns: 1fr; }
+  .hero-copy h1 { font-size: clamp(31px,9.5vw,42px); }
+  .hero-visual { height: 200px; }
+  .hero-emblem { max-width: 150px; max-height: 150px; }
+  .dashboard-head,
+  .admin-hero,
+  .page-hero { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .ready-badge,
+  .page-hero-stat,
+  .admin-user { width: 100%; min-width: 0; }
+  .dash-panels,
+  .admin-list-wrap,
+  .admin-create,
+  .admin-pending { padding: 17px; border-radius: 19px; }
+  .dash-section-head,
+  .content-head { gap: 12px; align-items: flex-start; }
+  .dash-section-head h2,
+  .content-head h2 { font-size: 18px; }
+  .profile-editor-side { padding: 18px; }
+  .profile-fields { min-width: 0; }
+  .manager-row { grid-template-columns: auto minmax(0,1fr); }
+  .manager-row > .button { grid-column: 1 / -1; width: 100%; }
+  .modal-hero { grid-template-columns: auto minmax(0,1fr); }
+  .modal-stat { grid-column: 1 / -1; width: 100%; }
+  .auth-main { padding-inline: 12px; }
+  .signup-intro { padding: 20px 16px; }
+  .signup-benefits { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 360px) {
+  .site-nav { left: 4px; right: 4px; }
+  .site-nav .nav-wrap { width: calc(100% - 8px); }
+  .site-nav .nav-mini-cta { min-width: 62px; padding-inline: 8px; font-size: 10px; }
+  .site-nav .menu-btn { flex-basis: 38px; width: 38px; height: 38px; }
+  .site-nav .logo-mark { flex-basis: 38px; width: 38px; height: 38px; }
+  .site-nav .main-nav,
+  .site-nav .main-nav.is-open { right: 2px; left: 2px; }
+  .hero-inner,.container,.signup-shell { width: calc(100% - 18px); }
+  .hero-copy h1 { font-size: 29px; }
+  .section-shell { padding-block: 52px; }
+  .signup-form { padding-inline: 12px; }
+}
+
+@media (min-width: 1025px) {
+  .site-nav .main-nav { position: static; display: flex !important; }
+  .site-nav .menu-btn { display: none !important; }
+}
