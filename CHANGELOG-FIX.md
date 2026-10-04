@@ -151,3 +151,9 @@
 - Reworked the registration/onboarding page into a responsive card-based layout with clear hierarchy and mobile-safe single-column fields.
 - Constrained the top navigation logo/wordmark so it cannot overflow the glass navigation container.
 - Kept `/api/auth/me` explicitly anonymous-safe (`200 { user: null }`) so a logged-out session is not treated as an authentication error.
+
+## 2026-10-05 — Build hotfix
+
+- Fixed a malformed JSX fragment in `src/main.jsx` inside the admin Reports component.
+- The component was missing its closing `</>` fragment and contained the fragment terminator in the wrong position, which caused Vite/esbuild to report `Unterminated regular expression` at build time.
+- Validated `src/main.jsx` with the TypeScript JSX parser and validated the Node server/API files with `node --check`.
