@@ -146,3 +146,8 @@
 - Preserved the original GrowLand logo with `object-fit: contain` and removed the redundant second membership CTA from the menu; the dedicated membership CTA remains in the header.
 - No changes to API routes, authentication logic, or business data.
 - CSS parse validation and Node syntax checks passed. A full Vite build was not run because dependencies are not installed in this environment and offline npm installation could not find the required package cache.
+
+## 2026-10-05 — final production polish
+- Reworked the registration/onboarding page into a responsive card-based layout with clear hierarchy and mobile-safe single-column fields.
+- Constrained the top navigation logo/wordmark so it cannot overflow the glass navigation container.
+- Kept `/api/auth/me` explicitly anonymous-safe (`200 { user: null }`) so a logged-out session is not treated as an authentication error.

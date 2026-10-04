@@ -234,15 +234,82 @@ function PodiumCard({member,index}){ return <article className={index===0?'podiu
 
 function Signup({onAuth}){
   const [form,setForm]=useState({name:'',age:'',phone:'',password:'',city:'',focus:'',level:'تازه شروع کردم',goal:'',hours:'۳ تا ۵ ساعت',future:'',why:'',about:''});
-  const [msg,setMsg]=useState(''); const [submitting,setSubmitting]=useState(false); const nav=useNavigate();
-  const submit=async e=>{e.preventDefault();if(submitting)return;setSubmitting(true);setMsg('');try{await api('/auth/register',{method:'POST',body:JSON.stringify(form)});await onAuth();nav('/dashboard')}catch(err){setMsg(err.message)}finally{setSubmitting(false)}};
-  return <div className="auth-layout"><div className="auth-aside"><Logo/><span className="pill accent-pill"><i/> عضویت در گرولند</span><h1>مسیر رشدت را <em>جدی</em> کن.</h1><p>یک پروفایل بساز، حوزه تمرکزت را مشخص کن و از همان روز اول رشدت را قابل مشاهده کن.</p><div className="auth-aside-list"><span><i><Icon name="check" size={13}/></i> داشبورد رشد شخصی</span><span><i><Icon name="check" size={13}/></i> فعالیت و شواهد</span><span><i><Icon name="check" size={13}/></i> سطح و XP</span><span><i><Icon name="check" size={13}/></i> مسیر شغلی</span></div></div>
-    <div className="auth-main"><div className="form-head"><span className="eyebrow">ثبت‌نام جدید</span><h2>پروفایل GrowLand را بساز</h2><p>اطلاعات را دقیق وارد کن؛ این داده‌ها برای طراحی مسیر رشد تو استفاده می‌شوند.</p></div><form onSubmit={submit} className="onboarding-form">
-      <FormSection title="اطلاعات پایه" note="01"><div className="fields-2"><Field label="نام و نام خانوادگی"><input required name="name" autoComplete="name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></Field><Field label="شماره تماس"><input required name="phone" autoComplete="tel" inputMode="tel" type="tel" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+989123456789"/></Field><Field label="سن"><input required name="age" inputMode="numeric" type="number" value={form.age} onChange={e=>setForm({...form,age:e.target.value})}/></Field><Field label="شهر"><input required name="city" autoComplete="address-level2" value={form.city} onChange={e=>setForm({...form,city:e.target.value})}/></Field><Field label="رمز عبور"><input required name="password" autoComplete="new-password" minLength="8" type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></Field></div></FormSection>
-      <FormSection title="مسیر فعلی" note="02"><div className="fields-2"><Field label="حوزه تمرکز"><select required value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}><option value="">انتخاب حوزه</option>{DEFAULT_SKILLS.map(x=><option key={x}>{x}</option>)}<option>سایر</option></select></Field><Field label="سطح فعلی"><select value={form.level} onChange={e=>setForm({...form,level:e.target.value})}>{['تازه شروع کردم','مقدماتی','متوسط','خوب','حرفه‌ای'].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="هدف اصلی"><select required value={form.goal} onChange={e=>setForm({...form,goal:e.target.value})}><option value="">انتخاب هدف</option>{['توسعه یک مهارت','ساختن رزومه و نمونه‌کار','افزایش اعتمادبه‌نفس و مهارت‌های فردی','آماده شدن برای ورود به بازار کار','پیدا کردن مسیر شغلی','رسیدن به درآمد','سایر'].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="زمان هفتگی"><select value={form.hours} onChange={e=>setForm({...form,hours:e.target.value})}>{['کمتر از ۳ ساعت','۳ تا ۵ ساعت','۵ تا ۱۰ ساعت','بیشتر از ۱۰ ساعت'].map(x=><option key={x}>{x}</option>)}</select></Field></div></FormSection>
-      <FormSection title="نگاه تو به رشد" note="03"><div className="fields-1"><Field label="اگر در سه ماه آینده فقط در یک چیز پیشرفت چشمگیری داشته باشی، آن چیست؟"><textarea required value={form.future} onChange={e=>setForm({...form,future:e.target.value})}/></Field><Field label="چرا فکر می‌کنی GrowLand می‌تواند به رشدت کمک کند؟"><textarea required value={form.why} onChange={e=>setForm({...form,why:e.target.value})}/></Field><Field label="یک جمله درباره خودت: من کسی هستم که..."><textarea required value={form.about} onChange={e=>setForm({...form,about:e.target.value})}/></Field></div></FormSection>
-      {msg&&<div className="error-box">{msg}</div>}<div className="form-footer"><span>با ثبت‌نام، وارد داشبورد رشد شخصی می‌شوی.</span><button className="button button-main" disabled={submitting}>{submitting?'در حال ثبت…':'ساخت حساب و شروع مسیر'} <Icon name="arrow" size={17}/></button></div>
-    </form><div className="auth-bottom">حساب داری؟ <Link to="/signin">وارد شو</Link></div></div>
+  const [msg,setMsg]=useState('');
+  const [submitting,setSubmitting]=useState(false);
+  const nav=useNavigate();
+  const update=(key)=>(e)=>setForm(current=>({...current,[key]:e.target.value}));
+  const submit=async e=>{
+    e.preventDefault();
+    if(submitting)return;
+    setSubmitting(true); setMsg('');
+    try{
+      await api('/auth/register',{method:'POST',body:JSON.stringify(form)});
+      await onAuth();
+      nav('/dashboard');
+    }catch(err){ setMsg(err.message || 'ثبت‌نام انجام نشد.'); }
+    finally{ setSubmitting(false); }
+  };
+  return <div className="signup-page">
+    <div className="signup-shell">
+      <aside className="signup-intro">
+        <div className="signup-intro-top">
+          <span className="pill accent-pill"><i/> عضویت در گرولند</span>
+          <span className="signup-step-count">۰۱ / شروع مسیر</span>
+        </div>
+        <h1>پروفایل GrowLand<br/><em>مسیرت را می‌سازد.</em></h1>
+        <p>اینجا فقط یک فرم ثبت‌نام پر نمی‌کنی؛ اطلاعاتی می‌دهی که کمک می‌کند مسیر رشد، مهارت و فرصتت از همان روز اول دقیق‌تر ساخته شود.</p>
+        <div className="signup-benefits">
+          <div><i><Icon name="target" size={15}/></i><span><b>مسیر مشخص</b><small>تمرکزت را انتخاب می‌کنی</small></span></div>
+          <div><i><Icon name="chart" size={15}/></i><span><b>رشد قابل مشاهده</b><small>پیشرفتت با XP ثبت می‌شود</small></span></div>
+          <div><i><Icon name="spark" size={15}/></i><span><b>خروجی واقعی</b><small>عمل و شواهد اهمیت دارند</small></span></div>
+          <div><i><Icon name="brief" size={15}/></i><span><b>نزدیک‌تر به فرصت</b><small>مهارتت را به بازار وصل کن</small></span></div>
+        </div>
+        <div className="signup-quote"><span>Grow together. Go further.</span><b>رشدت را فقط نگو؛ نشانش بده.</b></div>
+      </aside>
+
+      <section className="signup-form-area">
+        <div className="signup-form-head">
+          <div><span className="eyebrow">ثبت‌نام جدید</span><h2>حساب رشدت را بساز.</h2><p>اطلاعات را دقیق و واقعی وارد کن؛ بعداً می‌توانی پروفایلت را تکمیل و به‌روزرسانی کنی.</p></div>
+          <div className="signup-progress"><span>شروع</span><i><b/></i><span>مسیر رشد</span></div>
+        </div>
+
+        <form onSubmit={submit} className="signup-form">
+          <FormSection title="اطلاعات پایه" note="01">
+            <div className="fields-2">
+              <Field label="نام و نام خانوادگی"><input required name="name" autoComplete="name" value={form.name} onChange={update('name')} placeholder="مثلاً آشوکا احمدی"/></Field>
+              <Field label="شماره تماس"><input required name="phone" autoComplete="tel" inputMode="tel" type="tel" value={form.phone} onChange={update('phone')} placeholder="+989123456789"/></Field>
+              <Field label="سن"><input required name="age" inputMode="numeric" type="number" min="5" max="120" value={form.age} onChange={update('age')} placeholder="مثلاً ۲۳"/></Field>
+              <Field label="شهر"><input required name="city" autoComplete="address-level2" value={form.city} onChange={update('city')} placeholder="مثلاً تهران"/></Field>
+              <Field label="رمز عبور"><input required name="password" autoComplete="new-password" minLength="8" type="password" value={form.password} onChange={update('password')} placeholder="حداقل ۸ کاراکتر"/></Field>
+            </div>
+          </FormSection>
+
+          <FormSection title="مسیر فعلی" note="02">
+            <div className="fields-2">
+              <Field label="حوزه تمرکز"><select required value={form.focus} onChange={update('focus')}><option value="">انتخاب حوزه</option>{DEFAULT_SKILLS.map(x=><option key={x}>{x}</option>)}<option>سایر</option></select></Field>
+              <Field label="سطح فعلی"><select value={form.level} onChange={update('level')}>{['تازه شروع کردم','مقدماتی','متوسط','خوب','حرفه‌ای'].map(x=><option key={x}>{x}</option>)}</select></Field>
+              <Field label="هدف اصلی"><select required value={form.goal} onChange={update('goal')}><option value="">انتخاب هدف</option>{['توسعه یک مهارت','ساختن رزومه و نمونه‌کار','افزایش اعتمادبه‌نفس و مهارت‌های فردی','آماده شدن برای ورود به بازار کار','پیدا کردن مسیر شغلی','رسیدن به درآمد','سایر'].map(x=><option key={x}>{x}</option>)}</select></Field>
+              <Field label="زمان هفتگی"><select value={form.hours} onChange={update('hours')}>{['کمتر از ۳ ساعت','۳ تا ۵ ساعت','۵ تا ۱۰ ساعت','بیشتر از ۱۰ ساعت'].map(x=><option key={x}>{x}</option>)}</select></Field>
+            </div>
+          </FormSection>
+
+          <FormSection title="نگاه تو به رشد" note="03">
+            <div className="fields-1">
+              <Field label="اگر در سه ماه آینده فقط در یک چیز پیشرفت چشمگیری داشته باشی، آن چیست؟"><textarea required value={form.future} onChange={update('future')} placeholder="یک نتیجه مشخص و قابل اندازه‌گیری بنویس…"/></Field>
+              <Field label="چرا فکر می‌کنی GrowLand می‌تواند به رشدت کمک کند؟"><textarea required value={form.why} onChange={update('why')} placeholder="انتظارت از این مسیر چیست؟"/></Field>
+              <Field label="یک جمله درباره خودت: من کسی هستم که…"><textarea required value={form.about} onChange={update('about')} placeholder="خودت را کوتاه و واقعی معرفی کن…"/></Field>
+            </div>
+          </FormSection>
+
+          {msg&&<div className="error-box" role="alert"><Icon name="closeCircle" size={18}/><span>{msg}</span></div>}
+          <div className="signup-submit-row">
+            <div><strong>آماده‌ای شروع کنی؟</strong><span>بعد از ثبت‌نام، مستقیم وارد داشبورد رشد شخصی می‌شوی.</span></div>
+            <button className="button button-main signup-submit" disabled={submitting}>{submitting?'در حال ساخت پروفایل…':'ساخت حساب و شروع مسیر'} <Icon name="arrow" size={17}/></button>
+          </div>
+        </form>
+        <div className="auth-bottom signup-login-link">حساب داری؟ <Link to="/signin">وارد شو</Link></div>
+      </section>
+    </div>
   </div>;
 }
 function FormSection({title,note,children}){ return <section className="form-section"><div className="form-section-head"><span>{note}</span><div><h3>{title}</h3><small>اطلاعات مورد نیاز</small></div></div>{children}</section>; }
