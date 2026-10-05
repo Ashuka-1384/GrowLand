@@ -7,7 +7,7 @@ const localFile = path.resolve(process.cwd(), 'data/db.json');
 // Versioned on purpose: a clean deployment must not accidentally open an older
 // Blob written by a previous incompatible encryption/storage format.
 const blobPath = process.env.BLOB_DB_PATH || 'growland/v7/db.json.enc';
-const CACHE_TTL = 750;
+const CACHE_TTL = 0; // Production correctness: always read the latest Blob snapshot before a mutation.
 let memoryCache = null;
 let memoryCacheAt = 0;
 let writeChain = Promise.resolve();
@@ -72,6 +72,7 @@ export function normalizeDB(db) {
     assessments: Array.isArray(db?.assessments) ? db.assessments : [],
     jobs: Array.isArray(db?.jobs) ? db.jobs : [],
     auditLog: Array.isArray(db?.auditLog) ? db.auditLog : [],
+    notifications: Array.isArray(db?.notifications) ? db.notifications : [],
     site: db?.site && typeof db.site === 'object' ? db.site : {}
   };
 }

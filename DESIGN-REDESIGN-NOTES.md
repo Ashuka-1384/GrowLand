@@ -10,7 +10,7 @@
 - Added accessible focus states, generated form control IDs, autocomplete attributes, and improved Persian initials normalization.
 - Switched the logo asset to WebP and removed the runtime Google Fonts dependency.
 - Added Node 22 engine pin, structural check/typecheck/smoke-test scripts, and a datastore revision counter.
-- `loadDB()` now uses the short-lived datastore cache instead of forcing a fresh Blob read for every request.
+- Production Blob-backed reads no longer use the short-lived datastore cache; correctness is preferred over the previous 750ms cache window so member/admin mutations are less likely to appear stale.
 
 ## Product behavior preserved
 Routes, API contracts, authentication model, XP/level rules, and the GrowLand journey remain intact. The visual language stays deep green + lime + glass, but with less ornament and stronger hierarchy.

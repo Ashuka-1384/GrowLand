@@ -4170,3 +4170,18 @@ html.nav-menu-open body { overflow-x: hidden; }
   .site-nav .main-nav { position: static; display: flex !important; }
   .site-nav .menu-btn { display: none !important; }
 }
+
+/* GrowLand production polish: notifications + safer narrow layouts */
+.notifications-panel { overflow: hidden; }
+.notifications-list { display: grid; gap: 10px; }
+.notification-card { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid rgba(190,255,120,.12); border-radius: 16px; background: rgba(255,255,255,.025); }
+.notification-card.read { opacity: .72; }
+.notification-dot { width: 8px; height: 8px; border-radius: 50%; background: #aef36a; box-shadow: 0 0 18px rgba(174,243,106,.45); }
+.notification-card strong { display: block; color: #eef7e9; font-size: 13px; }
+.notification-card p { margin: 5px 0; color: #a4b4a1; font-size: 11px; line-height: 1.8; }
+.notification-card small { color: #637361; font-size: 9px; }
+.notification-card .button { min-height: 38px; white-space: nowrap; }
+@media (max-width: 520px) {
+  .notification-card { grid-template-columns: 8px minmax(0,1fr); }
+  .notification-card .button { grid-column: 2; justify-self: start; }
+}

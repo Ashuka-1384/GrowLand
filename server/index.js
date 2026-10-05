@@ -226,9 +226,16 @@ function readAuth(req) {
   try { return jwt.verify(raw, JWT_SECRET, { issuer: 'growland', audience: 'growland-web' }); }
   catch { return null; }
 }
-function admin(req, res, next) {
-  if (req.auth?.role !== 'admin') return res.status(403).json({ message: 'دسترسی ادمین لازم است.' });
-  next();
+async function admin(req, res, next) {
+  try {
+    if (req.auth?.sub === 'admin-root') return next();
+    const db = await loadDB();
+    const member = memberFromDB(db, req.auth?.sub);
+    if (member?.role === 'admin' && !member.deletedAt) return next();
+    return res.status(403).json({ message: 'دسترسی ادمین لازم است.' });
+  } catch (err) {
+    return storageFailure(res, err, 'بررسی دسترسی ادمین انجام نشد.');
+  }
 }
 function rootAdmin(req, res, next) {
   if (req.auth?.sub !== 'admin-root') return res.status(403).json({ message: 'فقط ادمین اصلی می‌تواند مدیران را مدیریت کند.' });
@@ -294,6 +301,7 @@ function ensureDomain(db) {
   db.assessments = Array.isArray(db.assessments) ? db.assessments : [];
   db.jobs = Array.isArray(db.jobs) ? db.jobs : [];
   db.auditLog = Array.isArray(db.auditLog) ? db.auditLog : [];
+  db.notifications = Array.isArray(db.notifications) ? db.notifications : [];
   for (const m of db.members) {
     m.xp = Math.max(0, Number(m.xp) || 0);
     m.level = calcLevel(m.xp);
@@ -320,6 +328,17 @@ function storageFailure(res, err, message) {
 function audit(db, actorId, action, targetId, metadata = {}) {
   db.auditLog.unshift({ id: randomUUID(), actorId, action, targetId, metadata, createdAt: new Date().toISOString() });
   db.auditLog = db.auditLog.slice(0, 2000);
+}
+
+function addNotification(db, memberId, title, body, type = 'info', metadata = {}) {
+  if (!memberId || !title || !body) return null;
+  const notification = {
+    id: randomUUID(), memberId, title: String(title).slice(0, 160), body: String(body).slice(0, 1000),
+    type, read: false, metadata, createdAt: new Date().toISOString()
+  };
+  db.notifications.unshift(notification);
+  db.notifications = db.notifications.slice(0, 3000);
+  return notification;
 }
 
 app.get('/api/health', async (req, res) => {
@@ -498,9 +517,36 @@ app.get('/api/member/dashboard', auth, async (req, res) => {
     const reports = db.reports.filter(r => r.memberId === m.id);
     const submissions = db.submissions.filter(s => s.memberId === m.id);
     const activities = db.activities.filter(a => a.active !== false);
-    res.json({ member: safeUser(m), reports, growth: m.growth || [], activities, submissions });
+    const notifications = db.notifications.filter(n => n.memberId === m.id).slice(0, 30);
+    res.json({ member: safeUser(m), reports, growth: m.growth || [], activities, submissions, notifications });
   } catch (err) {
     return storageFailure(res, err, 'ذخیره‌سازی GrowLand در دسترس نیست.');
+  }
+});
+
+app.get('/api/member/notifications', auth, async (req, res) => {
+  try {
+    const db = await loadDB();
+    const m = requireMember(req, res, db);
+    if (!m) return res.status(403).json({ message: 'این عملیات برای مدیر اصلی مجاز نیست.' });
+    res.json({ notifications: db.notifications.filter(n => n.memberId === m.id).slice(0, 50) });
+  } catch (err) {
+    return storageFailure(res, err, 'دریافت اعلان‌ها انجام نشد.');
+  }
+});
+
+app.patch('/api/member/notifications/:id/read', auth, async (req, res) => {
+  try {
+    const db = await loadDB();
+    const m = requireMember(req, res, db);
+    if (!m) return res.status(403).json({ message: 'این عملیات برای مدیر اصلی مجاز نیست.' });
+    const notification = db.notifications.find(n => n.id === req.params.id && n.memberId === m.id);
+    if (!notification) return res.status(404).json({ message: 'اعلان پیدا نشد.' });
+    notification.read = true;
+    await saveDB(db);
+    res.json({ notification });
+  } catch (err) {
+    return storageFailure(res, err, 'خواندن اعلان انجام نشد.');
   }
 });
 
@@ -535,7 +581,7 @@ app.put('/api/member/profile', auth, async (req, res) => {
       if (db.members.some(x => x.id !== m.id && x.phone === phone)) return res.status(409).json({ message: 'این شماره قبلاً استفاده شده است.' });
       m.phone = phone;
     }
-    for (const key of ['city', 'goal', 'about', 'future', 'why', 'hours', 'focusLevel']) {
+    for (const key of ['city', 'goal', 'about', 'future', 'why', 'hours', 'focusLevel', 'primarySkill']) {
       if (req.body[key] !== undefined) m[key] = String(req.body[key]).trim().slice(0, 2000);
     }
     if (req.body.age !== undefined) {
@@ -632,7 +678,7 @@ app.patch('/api/member/ready', auth, (req, res) => {
 app.get('/api/admin/overview', auth, admin, async (req, res) => {
   try {
     const db = await loadDB();
-    const members = [...db.members].sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
+    const members = db.members.filter(m => !m.deletedAt).sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
     const reports = [...db.reports].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
     const pendingSubmissions = db.submissions.filter(s => s.status === 'pending');
     res.json({ members: members.map(safeUser), reports, pendingSubmissions, activities: db.activities, assessments: db.assessments, auditLog: db.auditLog.slice(0, 100) });
@@ -749,12 +795,17 @@ app.delete('/api/admin/members/:id', auth, admin, rootAdmin, async (req, res) =>
   const m = memberFromDB(db, req.params.id);
   if (!m) return res.status(404).json({ message: 'عضو یافت نشد.' });
   if (m.phone === ADMIN_PHONE) return res.status(400).json({ message: 'ادمین اصلی قابل حذف نیست.' });
-  m.deletedAt = new Date().toISOString();
-  m.profileComplete = false;
-  m.role = 'member';
-  audit(db, req.auth.sub, 'member.deleted', m.id, { softDelete: true });
+  const index = db.members.findIndex(x => x.id === m.id);
+  if (index < 0) return res.status(404).json({ message: 'عضو یافت نشد.' });
+  const [deleted] = db.members.splice(index, 1);
+  // Keep an audit trail while removing the account from the active member store.
+  audit(db, req.auth.sub, 'member.deleted', deleted.id, { name: deleted.name, phone: deleted.phone });
+  db.reports = db.reports.filter(r => r.memberId !== deleted.id);
+  db.submissions = db.submissions.filter(s => s.memberId !== deleted.id);
+  db.assessments = db.assessments.filter(a => a.memberId !== deleted.id);
+  db.notifications = db.notifications.filter(n => n.memberId !== deleted.id);
   await saveDB(db);
-  res.json({ ok: true });
+  res.json({ ok: true, deletedMemberId: deleted.id });
 });
 
 app.delete('/api/admin/members/:id/skills', auth, admin, async (req, res) => {
@@ -770,9 +821,11 @@ app.delete('/api/admin/members/:id/skills', auth, admin, async (req, res) => {
 app.patch('/api/admin/role', auth, admin, rootAdmin, async (req, res) => {
   const db = await loadDB();
   const phone = normalizePhone(req.body?.phone);
-  const m = db.members.find(x => x.phone === phone);
+  const m = db.members.find(x => x.phone === phone && !x.deletedAt);
   if (!m) return res.status(404).json({ message: 'عضو با این شماره پیدا نشد.' });
+  if (m.phone === ADMIN_PHONE) return res.status(400).json({ message: 'این عضو از قبل مدیر اصلی است.' });
   m.role = 'admin';
+  addNotification(db, m.id, 'دسترسی ادمین برایت فعال شد', 'دسترسی مدیریت GrowLand برای حساب تو فعال شده است. یک‌بار صفحه را تازه‌سازی کن یا دوباره وارد شو تا منوی مدیریت را ببینی.', 'success', { role: 'admin' });
   audit(db, req.auth.sub, 'member.promoted', m.id);
   await saveDB(db);
   res.json({ member: safeUser(m) });
@@ -784,6 +837,7 @@ app.patch('/api/admin/members/:id/role', auth, admin, rootAdmin, async (req, res
   if (!m) return res.status(404).json({ message: 'عضو یافت نشد.' });
   if (m.phone === ADMIN_PHONE) return res.status(400).json({ message: 'ادمین اصلی قابل عزل نیست.' });
   m.role = req.body?.role === 'admin' ? 'admin' : 'member';
+  if (m.role === 'member') addNotification(db, m.id, 'دسترسی ادمین غیرفعال شد', 'دسترسی مدیریت حساب تو غیرفعال شده است.', 'warning', { role: 'member' });
   audit(db, req.auth.sub, `member.role.${m.role}`, m.id);
   await saveDB(db);
   res.json({ member: safeUser(m) });

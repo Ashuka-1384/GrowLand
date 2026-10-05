@@ -14,7 +14,8 @@
     "generate:secrets": "node scripts/generate-secrets.mjs",
     "check": "node --check server/index.js && node --check server/store.js && node --check api/index.js",
     "typecheck": "node scripts/typecheck.mjs",
-    "test": "node scripts/smoke-test.mjs"
+    "test": "node scripts/smoke-test.mjs && node scripts/regression-test.mjs",
+    "test:regression": "node scripts/regression-test.mjs"
   },
   "dependencies": {
     "@vercel/blob": "2.6.1",

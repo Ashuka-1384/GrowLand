@@ -157,3 +157,35 @@
 - Fixed a malformed JSX fragment in `src/main.jsx` inside the admin Reports component.
 - The component was missing its closing `</>` fragment and contained the fragment terminator in the wrong position, which caused Vite/esbuild to report `Unterminated regular expression` at build time.
 - Validated `src/main.jsx` with the TypeScript JSX parser and validated the Node server/API files with `node --check`.
+
+## 2026-10-05 — Production integrity / member-management pass
+
+### Member data
+- Registration data is now surfaced consistently in the member profile: focus, current level, weekly time, three-month goal, motivation and bio are all retained and editable where appropriate.
+- `primarySkill` is now accepted by the member profile API so the registration/profile model does not silently diverge.
+
+### Admin authorization
+- Admin middleware no longer trusts the role embedded in a stale JWT for member admins; it resolves the member's current role from the persistent store.
+- Promoting a member therefore takes effect without requiring a fresh login token.
+- The admin UI shows an explicit success notification after promotion.
+
+### Notifications
+- Added persistent member notifications to the storage model.
+- Promoting a member creates an in-app notification explaining that admin access is active.
+- Added notification listing/read endpoints and a dashboard notification panel.
+
+### Deletion
+- Member deletion now removes the account from the active `members` collection instead of leaving a soft-deleted member visible in the admin panel.
+- Related reports, submissions, assessments and notifications are removed with the account while the audit entry is retained.
+
+### Storage correctness
+- Disabled the short-lived read cache so production Blob-backed reads see the latest stored snapshot instead of serving a stale 750ms cache window.
+
+### Verification
+- `node --check server/index.js`: PASS
+- `node --check server/store.js`: PASS
+- TypeScript JSX parser (`src/main.jsx`): PASS
+- `npm run typecheck`: PASS
+- `npm run test`: PASS
+- `npm run test:regression`: PASS
+- `npm install --no-audit --no-fund`: timed out in the execution environment; therefore `npm run build` was not claimed as verified.
