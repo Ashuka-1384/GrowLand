@@ -46,7 +46,10 @@ function normalizeOrigin(value = '') {
 const allowedOrigins = (process.env.CLIENT_URL || '').split(',').map(normalizeOrigin).filter(Boolean);
 
 function requestHost(req) {
-  return String(req.headers['x-forwarded-host'] || req.get('host') || '').split(',')[0].trim().toLowerCase();
+  // On Vercel, x-forwarded-host can refer to the deployment host while the
+  // browser is using a project/alias domain. Prefer the actual Host header
+  // so same-origin browser requests are not rejected with HTTP 403.
+  return String(req.get('host') || req.headers['x-forwarded-host'] || '').split(',')[0].trim().toLowerCase();
 }
 function isSameOrigin(req, origin) {
   try {

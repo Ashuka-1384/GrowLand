@@ -16,3 +16,6 @@ The glass navigation now clips and constrains the logo/wordmark inside the navig
 
 ## Validation
 Server/API JavaScript syntax was checked with Node's parser. Dependency installation/build could not be executed in this environment because `npm install` did not complete within the available execution window.
+
+## 4. Vercel same-origin / static asset hardening
+The API origin check now prefers the browser-facing `Host` header over `x-forwarded-host`, preventing false HTTP 403 responses on Vercel aliases/deployment URLs. The SPA rewrite also excludes paths that look like static files, so CSS/JS/image requests are never intentionally rewritten to `index.html`.
