@@ -18,3 +18,15 @@
 ## استقرار
 - `vite.config.js` اضافه شد (proxy برای `/api`). ساختار پروژه، `vercel.json` و متغیرهای محیطی بدون تغییر.
 - `package-lock.json` برای بیلد تکرارپذیر اضافه شد.
+
+### اصلاح پایدار اعلان‌ها — 2026-10-08
+- رفع race condition در `NotificationBell`: بعد از بارگذاری اعلان‌ها، شمارنده‌ی unread از state قدیمی تصمیم‌گیری نمی‌کند و پاسخ واقعی API مبنا قرار می‌گیرد.
+- پس از موفقیت `POST /notifications/read`، وضعیت `read` آیتم‌های نمایش‌داده‌شده نیز در state محلی به‌روزرسانی می‌شود تا هایلایت اعلان جدید باقی نماند.
+- import بدون استفاده‌ی `useMemo` از `src/main.jsx` حذف شد.
+
+### Verification — 2026-10-08
+- `npm run check` — OK
+- JSX syntax/type parser check با TypeScript — OK
+- `npm test` — OK
+- اعتبارسنجی JSON دیتابیس — OK
+- `npm run build` در محیط بررسی اجرا نشد؛ نصب dependencyها به‌دلیل نبود cache کامل npm و timeout شبکه ممکن نبود.

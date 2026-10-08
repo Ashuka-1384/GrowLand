@@ -1,4 +1,4 @@
-import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Component, useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import '@fontsource/vazirmatn/arabic-400.css';
@@ -174,10 +174,19 @@ function timeAgo(iso){ const t=new Date(iso).getTime(); if(!t) return ''; const 
 
 function NotificationBell(){
   const [items,setItems]=useState([]); const [unread,setUnread]=useState(0); const [open,setOpen]=useState(false); const ref=useRef(null);
-  const load=useCallback(()=>api('/notifications').then(d=>{setItems(d.notifications||[]);setUnread(d.unread||0)}).catch(()=>{}),[]);
+  const load=useCallback(async()=>{
+    try{
+      const d=await api('/notifications');
+      setItems(d.notifications||[]);
+      setUnread(d.unread||0);
+      return d;
+    }catch{
+      return null;
+    }
+  },[]);
   useEffect(()=>{ load(); const timer=window.setInterval(()=>{ if(document.visibilityState==='visible') load(); },30000); const onFocus=()=>load(); window.addEventListener('focus',onFocus); window.addEventListener('growland:notifications-changed',onFocus); return()=>{ window.clearInterval(timer); window.removeEventListener('focus',onFocus); window.removeEventListener('growland:notifications-changed',onFocus); }; },[load]);
   useEffect(()=>{ if(!open) return; const down=e=>{ if(!ref.current?.contains(e.target)) setOpen(false); }; const key=e=>{ if(e.key==='Escape') setOpen(false); }; document.addEventListener('pointerdown',down); document.addEventListener('keydown',key); return()=>{ document.removeEventListener('pointerdown',down); document.removeEventListener('keydown',key); }; },[open]);
-  const toggle=async()=>{ const next=!open; setOpen(next); if(next){ await load(); if(unread>0){ api('/notifications/read',{method:'POST',body:JSON.stringify({})}).then(()=>setUnread(0)).catch(()=>{}); } } };
+  const toggle=async()=>{ const next=!open; setOpen(next); if(!next)return; const data=await load(); if(data?.unread>0){ api('/notifications/read',{method:'POST',body:JSON.stringify({})}).then(()=>{ setUnread(0); setItems(current=>current.map(item=>({...item,read:true}))); }).catch(()=>{}); } };
   return <div className="notif" ref={ref}><button type="button" className="icon-btn notif-btn" onClick={toggle} aria-label={unread?`${unread} اعلان خوانده‌نشده`:'اعلان‌ها'} aria-expanded={open}><Icon name="bell" size={19}/>{unread>0&&<b className="notif-count">{unread>9?'+9':unread.toLocaleString('fa-IR')}</b>}</button>{open&&<div className="notif-panel" role="dialog" aria-label="اعلان‌ها"><div className="notif-head"><strong>اعلان‌ها</strong><button type="button" onClick={load}><Icon name="refresh" size={14}/></button></div><div className="notif-list">{items.length?items.map(n=><article key={n.id} className={n.read&&!(unread>0&&!n.read)?'notif-item':'notif-item is-new'}><b>{n.title}</b>{n.body&&<p>{n.body}</p>}<small>{timeAgo(n.createdAt)}</small></article>):<div className="notif-empty">اعلانی وجود ندارد.</div>}</div></div>}</div>;
 }
 
