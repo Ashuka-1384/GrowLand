@@ -459,3 +459,94 @@ input[type=search]{-webkit-appearance:none}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 @media (hover:none){.member-modern-card:hover,.skill-tile:hover,.button-main:hover:not(:disabled){transform:none}}
+
+/* ==========================================================================
+   v3 — visual polish · member profile popup · rendering performance
+   (appended to the single stylesheet; nothing above was restructured)
+   ========================================================================== */
+html{scrollbar-width:thin;scrollbar-color:rgba(142,210,63,.35) var(--bg)}
+html.modal-open{overflow:hidden}
+
+/* The fixed background gradient lives on its own composited layer instead of
+   `background-attachment:fixed`, which forces a full repaint on every scroll frame on mobile. */
+body{background:transparent}
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(900px 520px at 85% -10%,rgba(110,190,60,.14),transparent 60%),
+  radial-gradient(700px 480px at -10% 40%,rgba(60,140,80,.10),transparent 60%),var(--bg)}
+
+/* below-the-fold sections are only laid out/painted when they approach the viewport */
+.skills-section,.notice-section,.cta-band,.site-footer{content-visibility:auto;contain-intrinsic-size:auto 520px}
+
+/* ---------- buttons, forms, small atoms ---------- */
+.button:active:not(:disabled){transform:translateY(1px) scale(.99)}
+.button-main{position:relative;overflow:hidden}
+.button-main::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(120%);transition:transform .6s ease;pointer-events:none}
+.button-main:hover:not(:disabled)::after{transform:translateX(-120%)}
+.field-hint{color:var(--faint);font-size:.76rem;line-height:1.5}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(198,238,83,.65);box-shadow:0 0 0 3px rgba(142,210,63,.16);outline:none}
+.error-surface{flex-wrap:wrap;justify-content:center}
+.error-surface .button{margin-top:6px}
+
+/* ---------- hero ---------- */
+.hero-copy h1 em{background:linear-gradient(110deg,var(--accent-2) 0%,#8ff0b8 45%,var(--accent-2) 90%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gl-shine 8s linear infinite}
+@keyframes gl-shine{to{background-position:-200% center}}
+
+/* ---------- clickable member cards (home podium + /members) ---------- */
+.is-clickable{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .25s,box-shadow .25s}
+.is-clickable:hover{border-color:rgba(198,238,83,.55);transform:translateY(-4px);box-shadow:0 22px 46px -24px rgba(142,210,63,.5)}
+.is-clickable:active{transform:translateY(-1px) scale(.995)}
+.is-clickable:focus-visible{outline:2px solid var(--accent-2);outline-offset:3px}
+.card-peek{display:inline-flex;align-items:center;gap:6px;margin-top:auto;font-size:.8rem;font-weight:700;color:var(--accent-2);opacity:.7;transition:opacity .2s}
+.is-clickable:hover .card-peek,.is-clickable:focus-visible .card-peek{opacity:1}
+.podium-card .card-peek{grid-column:1/-1;justify-self:center;margin-top:2px}
+.podium-card.winner::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(160deg,rgba(198,238,83,.9),transparent 42%,rgba(198,238,83,.3));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.member-modern-card:hover .avatar,.podium-card:hover .avatar{box-shadow:0 0 0 3px rgba(198,238,83,.28)}
+.member-modern-card .avatar,.podium-card .avatar{transition:box-shadow .25s}
+
+/* ---------- member profile popup ---------- */
+.pm-backdrop{z-index:240;animation:gl-fade .2s ease-out}
+.pm-modal{max-width:620px;gap:16px;background:linear-gradient(180deg,#0f2417,#0a160e);animation:gl-sheet .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes gl-fade{from{opacity:0}}
+@keyframes gl-sheet{from{opacity:0;transform:translateY(26px) scale(.98)}}
+.pm-hero{display:flex;flex-wrap:wrap;align-items:center;gap:18px;padding-top:34px}
+.pm-avatar{position:relative;display:grid;place-items:center;padding:7px}
+.pm-avatar::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,var(--accent-2),transparent 38%,var(--accent),transparent 78%,var(--accent-2));animation:spin 9s linear infinite;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px))}
+.pm-avatar .avatar{position:relative;box-shadow:0 0 0 4px #0b1a10}
+.pm-id{flex:1 1 170px;min-width:0}
+.pm-id h2{font-size:1.45rem;overflow-wrap:anywhere}
+.pm-id p{color:var(--muted)}
+.pm-rank{display:inline-block;margin-bottom:6px;padding:2px 12px;border-radius:99px;font-size:.76rem;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--line)}
+.pm-rank.top{color:var(--accent-ink);background:linear-gradient(135deg,var(--accent-2),var(--accent));border-color:transparent}
+.pm-progress>div:first-child{display:flex;justify-content:space-between;margin-bottom:8px;font-size:.82rem;color:var(--muted)}
+.pm-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pm-stats>div{display:grid;gap:2px;padding:12px 8px;text-align:center;border-radius:var(--radius-sm);background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.pm-stats strong{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:1.05rem;line-height:1.5;color:var(--accent-2)}
+.pm-stats span{font-size:.76rem;color:var(--faint)}
+.pm-stats .is-ready strong{color:var(--ok)}
+.pm-stats .is-ready .status-dot{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.pm-about{margin:0;padding:14px 16px;border-radius:var(--radius-sm);background:rgba(142,210,63,.06);border:1px solid rgba(198,238,83,.22);border-inline-start:3px solid var(--accent)}
+.pm-about small{color:var(--accent-2);font-weight:700;font-size:.76rem}
+.pm-about p{margin-top:4px;overflow-wrap:anywhere;white-space:pre-wrap}
+.member-facts.pm-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pm-skills{display:grid;gap:12px}.pm-skills h3{font-size:1rem}
+.pm-skill>div:first-child{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:.84rem}
+.pm-skill span{overflow-wrap:anywhere}.pm-skill b{font-weight:600;color:var(--muted);white-space:nowrap}
+@media (max-width:420px){.pm-stats strong{font-size:.92rem}.pm-hero{gap:12px}}
+
+/* ---------- dashboard / admin polish ---------- */
+.kpi-bar{height:6px;margin-top:10px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.kpi-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent-deep),var(--accent-2));transition:width .6s ease}
+.kpi-card,.dash-panels,.admin-metric,.admin-list-wrap{transition:border-color .25s,box-shadow .25s}
+.kpi-card:hover,.dash-panels:hover,.admin-metric:hover{border-color:rgba(198,238,83,.3)}
+
+/* ---------- scroll-reveal (pure CSS; ignored by browsers without scroll-driven animations) ---------- */
+@supports (animation-timeline:view()){
+  @media (prefers-reduced-motion:no-preference){
+    .principle-item,.journey-node,.skill-tile,.notice-card,.cta-band-inner{animation:gl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 40%}
+  }
+}
+@keyframes gl-rise{from{opacity:0;transform:translateY(24px)}}
+@media (hover:none){.is-clickable:hover{transform:none;box-shadow:none}}

@@ -7,5 +7,18 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 5173, proxy: api },
   preview: { port: 4173, proxy: api },
-  build: { sourcemap: false, chunkSizeWarningLimit: 600 }
+  build: {
+    sourcemap: false,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        // Framework code changes rarely: keeping it in its own hashed chunks means returning
+        // visitors re-download only the (small) app chunk after each deploy.
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          router: ['react-router-dom']
+        }
+      }
+    }
+  }
 });

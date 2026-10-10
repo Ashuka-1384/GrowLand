@@ -116,30 +116,38 @@ function toLatinDigits(v = '') {
 function normalizePhone(v = '') {
   let s = toLatinDigits(v).trim().replace(/[\s()-]/g, '');
   if (s.startsWith('0098')) s = '+98' + s.slice(4);
+  if (/^989\d{9}$/.test(s)) s = '+' + s;
   if (s.startsWith('09')) s = '+98' + s.slice(1);
-  if (s.startsWith('9')) s = '+98' + s;
+  if (/^9\d{9}$/.test(s)) s = '+98' + s;
   return s;
 }
 function isValidPhone(v) { return /^\+989\d{9}$/.test(normalizePhone(v)); }
 
-function passwordHash(password) {
+// Async scrypt: the synchronous variant blocked the whole event loop on every login/register.
+const scryptAsync = (password, salt, length) => new Promise((resolve, reject) => {
+  crypto.scrypt(password, salt, length, { N: 16384, r: 8, p: 1 }, (error, key) => (error ? reject(error) : resolve(key)));
+});
+async function passwordHash(password) {
   const salt = crypto.randomBytes(16);
-  const hash = crypto.scryptSync(password, salt, 64, { N: 16384, r: 8, p: 1 });
+  const hash = await scryptAsync(password, salt, 64);
   return `${salt.toString('base64')}.${hash.toString('base64')}`;
 }
-function verifyPassword(password, stored) {
+async function verifyPassword(password, stored) {
   try {
     const [salt64, hash64] = String(stored || '').split('.');
     if (!salt64 || !hash64) return false;
     const salt = Buffer.from(salt64, 'base64');
     const expected = Buffer.from(hash64, 'base64');
-    const actual = crypto.scryptSync(password, salt, expected.length, { N: 16384, r: 8, p: 1 });
+    const actual = await scryptAsync(password, salt, expected.length);
     return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
   } catch {
     return false;
   }
 }
-function verifyAdminPassword(password) {
+// Used for unknown phone numbers so "no such user" and "wrong password" take the same time.
+let dummyHashPromise = null;
+const dummyHash = () => (dummyHashPromise ||= passwordHash(crypto.randomBytes(12).toString('hex')));
+async function verifyAdminPassword(password) {
   if (!validatePassword(password) || !ADMIN_PASSWORD) return false;
   // Production must use a scrypt hash; plaintext is only accepted for local development.
   if (isProduction) return verifyPassword(password, ADMIN_PASSWORD);
@@ -166,7 +174,10 @@ function safeUser(m) {
     ready: x.jobReadiness?.status === 'job_ready'
   };
 }
-function publicUser(m) {
+// What a PUBLIC visitor may see about a member. Phone, age and the private registration
+// answers (why / future) are deliberately NOT included. Edit this list to change what the
+// member-profile popup on the home page and /members can show.
+function publicUser(m, proofs = 0) {
   if (!m) return null;
   return {
     id: m.id,
@@ -180,6 +191,10 @@ function publicUser(m) {
     ready: m.jobReadiness?.status === 'job_ready',
     jobReadiness: m.jobReadiness?.status || 'not_ready',
     profileComplete: m.profileComplete !== false,
+    focusLevel: m.focusLevel || '',
+    goal: m.goal || '',
+    about: String(m.about || '').trim().slice(0, 240),
+    proofs,
     createdAt: m.createdAt || null
   };
 }
@@ -364,25 +379,32 @@ const rootUser = db => ({ id: 'admin-root', name: rootAdminName(db), phone: ADMI
 const STORAGE_MSG = 'ذخیره‌سازی GrowLand در دسترس نیست. تنظیمات Blob را بررسی کنید.';
 
 app.get('/api/health', route(STORAGE_MSG, async (req, res) => {
-  const db = await loadDB();
-  res.json({
-    ok: true,
-    storage: process.env.BLOB_READ_WRITE_TOKEN ? 'blob' : 'local',
-    blobPath: process.env.BLOB_READ_WRITE_TOKEN ? (process.env.BLOB_DB_PATH || 'growland/v7/db.json.enc') : null,
-    members: db.members.filter(m => !m.deletedAt).length
-  });
+  await loadDB(); // proves storage is reachable
+  res.json({ ok: true });
 }));
+
+// Public, identical for every visitor: let the CDN absorb bursts for a few seconds instead of
+// decrypting the whole database on every home-page view.
+const publicCache = res => {
+  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=20, stale-while-revalidate=60');
+  res.setHeader('Vary', 'Accept-Encoding');
+};
 
 app.get('/api/public/announcements', route(STORAGE_MSG, async (req, res) => {
   const db = await loadDB();
+  publicCache(res);
   res.json({ announcements: db.announcements });
 }));
 app.get('/api/public/members', route(STORAGE_MSG, async (req, res) => {
   const db = await loadDB();
+  const proofs = new Map();
+  for (const s of db.submissions) if (s.status === 'approved') proofs.set(s.memberId, (proofs.get(s.memberId) || 0) + 1);
   const members = db.members
     .filter(m => m.profileComplete !== false && !m.deletedAt)
-    .sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp));
-  res.json({ members: members.map(publicUser) });
+    .sort((a, b) => calcLevel(b.xp) - calcLevel(a.xp) || Number(b.xp) - Number(a.xp)
+      || String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+  publicCache(res);
+  res.json({ members: members.map(m => publicUser(m, proofs.get(m.id) || 0)) });
 }));
 
 app.post('/api/auth/register', rateLimit({ windowMs: 60_000, max: 10 }), route('ثبت‌نام انجام نشد؛ ذخیره‌سازی GrowLand در دسترس نیست.', async (req, res) => {
@@ -400,7 +422,7 @@ app.post('/api/auth/register', rateLimit({ windowMs: 60_000, max: 10 }), route('
   const age = rawAge === '' ? null : Number(rawAge);
   if (age !== null && (!Number.isInteger(age) || age < 5 || age > 120)) throw new HttpError(400, 'سن واردشده معتبر نیست.');
   if (ADMIN_PHONE && phone === ADMIN_PHONE) throw new HttpError(409, 'این شماره برای مدیر اصلی رزرو شده است.');
-  const hash = passwordHash(password);
+  const hash = await passwordHash(password);
 
   const member = await change(db => {
     if (db.members.some(m => m.phone === phone && !m.deletedAt)) throw new HttpError(409, 'این شماره قبلاً ثبت‌نام کرده است. وارد شوید.');
@@ -440,13 +462,13 @@ app.post('/api/auth/login', rateLimit({ windowMs: 60_000, max: 10 }), route('و�
   const bad = () => new HttpError(401, 'شماره موبایل یا رمز عبور نادرست است.');
   const db = await loadDB();
   if (ADMIN_PHONE && phone === ADMIN_PHONE) {
-    if (!verifyAdminPassword(password)) throw bad();
+    if (!(await verifyAdminPassword(password))) throw bad();
     const u = rootUser(db);
     setAuthCookie(res, tokenFor(u));
     return res.json({ user: u });
   }
   const member = db.members.find(m => m.phone === phone && !m.deletedAt);
-  if (!member || !member.passwordHash || !verifyPassword(password, member.passwordHash)) throw bad();
+  if (!(await verifyPassword(password, member?.passwordHash || await dummyHash())) || !member?.passwordHash) throw bad();
   setAuthCookie(res, tokenFor(member));
   res.json({ user: safeUser(member) });
 }));
@@ -456,10 +478,10 @@ app.post('/api/auth/password', auth, route('تغییر رمز انجام نشد.
   const currentPassword = String(req.body?.currentPassword || '');
   const newPassword = String(req.body?.newPassword || '');
   if (!validatePassword(newPassword)) throw new HttpError(400, 'رمز جدید باید بین ۸ تا ۱۲۸ کاراکتر باشد.');
-  const hash = passwordHash(newPassword);
-  await change(db => {
+  const hash = await passwordHash(newPassword);
+  await change(async db => {
     const member = mustMember(db, req.auth.sub);
-    if (!member.passwordHash || !verifyPassword(currentPassword, member.passwordHash)) throw new HttpError(401, 'رمز فعلی نادرست است.');
+    if (!member.passwordHash || !(await verifyPassword(currentPassword, member.passwordHash))) throw new HttpError(400, 'رمز فعلی نادرست است.');
     member.passwordHash = hash;
     audit(db, member.id, 'auth.password-changed', member.id);
   });

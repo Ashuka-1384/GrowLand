@@ -3,7 +3,11 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { put, get, BlobPreconditionFailedError } from '@vercel/blob';
 
-const localFile = path.resolve(process.cwd(), 'data/db.json');
+// `data/db.json` is the checked-in SEED and is never written to. Local development
+// writes go to `.data/db.local.json` (git-ignored) so test members, password hashes
+// and notifications can never leak into a commit and then into the production seed.
+const seedFile = path.resolve(process.cwd(), 'data/db.json');
+const runtimeFile = path.resolve(process.cwd(), '.data/db.local.json');
 // Versioned on purpose: a clean deployment must not accidentally open an older
 // Blob written by a previous incompatible encryption/storage format.
 const blobPath = process.env.BLOB_DB_PATH || 'growland/v7/db.json.enc';
@@ -77,9 +81,19 @@ export function normalizeDB(db) {
 
 async function readLocalSeed() {
   try {
-    return normalizeDB(JSON.parse(await fs.readFile(localFile, 'utf8')));
+    return normalizeDB(JSON.parse(await fs.readFile(seedFile, 'utf8')));
   } catch (error) {
     throw new Error(`Local seed database is unavailable: ${error.message}`);
+  }
+}
+
+// Local (non-Blob) mode: the runtime copy if it exists, otherwise the pristine seed.
+async function readLocal() {
+  try {
+    return normalizeDB(JSON.parse(await fs.readFile(runtimeFile, 'utf8')));
+  } catch (error) {
+    if (error?.code === 'ENOENT') return readLocalSeed();
+    throw new Error(`Local seed database is unreadable: ${error.message}`);
   }
 }
 
@@ -144,9 +158,10 @@ async function writeBlobDatabase(db, { etag = null, create = false } = {}) {
 
 async function writeLocal(db) {
   const body = JSON.stringify(db, null, 2);
-  const temp = `${localFile}.${process.pid}.${Date.now()}.tmp`;
+  await fs.mkdir(path.dirname(runtimeFile), { recursive: true });
+  const temp = `${runtimeFile}.${process.pid}.${Date.now()}.tmp`;
   await fs.writeFile(temp, body, 'utf8');
-  await fs.rename(temp, localFile);
+  await fs.rename(temp, runtimeFile);
 }
 
 // Reads are ALWAYS fresh. The previous 750ms in-memory cache made one serverless
@@ -157,7 +172,7 @@ export async function readDB() {
   if (inflightRead) return structuredClone(await inflightRead);
   inflightRead = (async () => {
     if (hasBlob()) return (await readBlobDatabase()).db;
-    return readLocalSeed();
+    return readLocal();
   })().finally(() => { inflightRead = null; });
   return structuredClone(await inflightRead);
 }
@@ -171,7 +186,7 @@ export async function readDB() {
 export function mutateDB(fn) {
   const operation = async () => {
     for (let attempt = 0; attempt < MAX_CAS_RETRIES; attempt += 1) {
-      const loaded = hasBlob() ? await readBlobDatabase() : { db: await readLocalSeed(), etag: null };
+      const loaded = hasBlob() ? await readBlobDatabase() : { db: await readLocal(), etag: null };
       const db = loaded.db;
       const result = await fn(db);
       if (result && result.__abort) return result.value;
